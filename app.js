@@ -63,6 +63,7 @@ const EXAMPLES = {
 };
 
 let pipelineStates = []; 
+const networkInstances = {};
 
 function parseGrammar(text) {
     const lines = text.split('\n');
@@ -411,7 +412,7 @@ function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container) {
         },
         layout: { randomSeed: 5 }
     };
-    new vis.Network(container, {nodes: visNodes, edges: visEdges}, options);
+    networkInstances[container.id] = new vis.Network(container, {nodes: visNodes, edges: visEdges}, options);
 }
 
 // ----------------------------------------
@@ -774,8 +775,25 @@ function updateMorphingGraph(beforeGrammar, afterGrammar) {
             layout: { randomSeed: 5 }
         };
         dynamicNetworkInstance = new vis.Network(DOM.dynamicNetwork, {nodes: dynamicVisNodes, edges: dynamicVisEdges}, options);
+        networkInstances['dynamic-network'] = dynamicNetworkInstance;
     }
 }
+
+// Centeralized Reset Graph Handler
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('btn-reset-graph')) {
+        const networkId = e.target.getAttribute('data-network');
+        const network = networkInstances[networkId];
+        if (network) {
+            network.fit({ 
+                animation: { 
+                    duration: 600, 
+                    easingFunction: 'easeInOutQuad' 
+                } 
+            });
+        }
+    }
+});
 
 function updateDynamicPlayback() {
     DOM.graphStageLabel.innerText = STAGE_LABELS[currentPlaybackStage];
