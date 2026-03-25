@@ -676,9 +676,21 @@ let dynamicNetworkInstance = null;
 let dynamicVisNodes = null;
 let dynamicVisEdges = null;
 
-function updateMorphingGraph(beforeGrammar, afterGrammar) {
+function updateMorphingGraph(beforeGrammar, afterGrammar, forceReload = false) {
     if (!window.vis) return;
     
+    // For a forced reload, we'll clear everything and recreate the network instance
+    if (forceReload) {
+        if (dynamicNetworkInstance) {
+            dynamicNetworkInstance.destroy();
+            dynamicNetworkInstance = null;
+        }
+        if (dynamicVisNodes) {
+            dynamicVisNodes.clear();
+            dynamicVisEdges.clear();
+        }
+    }
+
     if (!dynamicVisNodes) {
         dynamicVisNodes = new vis.DataSet();
         dynamicVisEdges = new vis.DataSet();
@@ -783,14 +795,26 @@ function updateMorphingGraph(beforeGrammar, afterGrammar) {
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('btn-reset-graph')) {
         const networkId = e.target.getAttribute('data-network');
-        const network = networkInstances[networkId];
-        if (network) {
-            network.fit({ 
-                animation: { 
-                    duration: 600, 
-                    easingFunction: 'easeInOutQuad' 
-                } 
-            });
+        
+        if (networkId === 'dynamic-network') {
+            // Re-render the dynamic network at current stage
+            const stage = currentPlaybackStage;
+            const before = stage === 0 ? pipelineStates[0].grammar : pipelineStates[stage - 1].grammar;
+            const after = pipelineStates[stage].grammar;
+            updateMorphingGraph(before, after, true);
+        } else {
+            // Re-render static diff graphs for Stage 1-4
+            const stageMap = {
+                'u1-network': [0, 1],
+                'null-network': [1, 2],
+                'unit-network': [2, 3],
+                'u2-network': [3, 4]
+            };
+            const indices = stageMap[networkId];
+            if (indices && pipelineStates.length > 0) {
+                const container = document.getElementById(networkId);
+                renderGrammarDiffGraph(pipelineStates[indices[0]].grammar, pipelineStates[indices[1]].grammar, container);
+            }
         }
     }
 });
