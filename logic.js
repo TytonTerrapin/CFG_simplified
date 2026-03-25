@@ -33,7 +33,7 @@ function remove_null_productions(grammar) {
     });
 
     if (nullable.size === 0) {
-        return { grammar, step_logs };
+        return { grammar, step_logs, stage_sets: { nullable: [] } };
     }
 
     const original_grammar = JSON.parse(JSON.stringify(grammar));
@@ -117,7 +117,11 @@ function remove_null_productions(grammar) {
         type: "null_removal"
     });
 
-    return { grammar, step_logs };
+    return { 
+        grammar, 
+        step_logs, 
+        stage_sets: { nullable: Array.from(nullable) }
+    };
 }
 
 function _find_nullable(grammar) {
@@ -179,7 +183,7 @@ function remove_unit_productions(grammar) {
     });
 
     if (Object.keys(unit_prods).length === 0) {
-        return { grammar, step_logs };
+        return { grammar, step_logs, stage_sets: { closures: {} } };
     }
 
     const graph = _build_unit_graph(grammar, unit_prods);
@@ -245,7 +249,11 @@ function remove_unit_productions(grammar) {
         type: "unit_replacement"
     });
 
-    return { grammar, step_logs };
+    return { 
+        grammar, 
+        step_logs,
+        stage_sets: { closures: closureArrayFormat }
+    };
 }
 
 function _find_unit_productions(grammar) {
@@ -317,7 +325,14 @@ function remove_useless_symbols(grammar) {
     const p2 = _phase2_remove_unreachable(grammar);
     step_logs.push(p2);
     
-    return { grammar, step_logs };
+    return { 
+        grammar, 
+        step_logs,
+        stage_sets: {
+            generating: p1.productive_symbols,
+            reachable: p2.reachable_symbols
+        }
+    };
 }
 
 function _phase1_remove_nonproductive(grammar) {

@@ -42,6 +42,8 @@ const DOM = {
     btnNextGraph: document.getElementById('btn-next-graph'),
     graphStageLabel: document.getElementById('graph-stage-label'),
     dynamicNetwork: document.getElementById('dynamic-network'),
+    // New UI Elements
+    btnExportReport: document.getElementById('btn-export-report'),
 };
 
 const STAGE_LABELS = [
@@ -166,13 +168,15 @@ function buildHtmlLogs(logs) {
         }
         else if (log.type === "production_generation" && log.rule_transformations) {
             details = `<div class="rule-list">` + log.rule_transformations.map(rt => {
-                return rt.generated_rules.map(gr => 
-                    `<div class="rule-item ${gr.type === 'original' ? 'kept' : 'addition'}">
-                        <span>${gr.rule}</span>
+                let html = `<div class="rule-item" style="border-bottom:none; padding-bottom:0;"><strong>Rule: ${rt.original_rule}</strong></div>`;
+                rt.generated_rules.forEach(gr => {
+                    html += `<div class="rule-item ${gr.type === 'original' ? 'kept' : 'addition'}" style="margin-left: 15px;">
+                        <span>${gr.type === 'original' ? 'Kept' : 'Generated'}: ${gr.rule}</span>
                         <span style="font-size:0.8em;opacity:0.7">${gr.reason}</span>
-                    </div>`
-                ).join('');
-            }).join('') + `</div>`;
+                    </div>`;
+                });
+                return html;
+            }).join('<hr style="border:0;border-top:1px dashed #333;margin:4px 0;">') + `</div>`;
         }
         else if (log.type === "unit_identification") {
             let u = [];
@@ -185,9 +189,9 @@ function buildHtmlLogs(logs) {
             details = `<div class="rule-list">` + log.rule_transformations.map(rt => {
                 let s = "";
                 rt.removed_units.forEach(ru => s += `<div class="rule-item removal">Removed unit pair: ${ru}</div>`);
-                rt.added_productions.forEach(ap => s += `<div class="rule-item addition">Added: ${ap.rule} <span style="font-size:0.8em;opacity:0.7">via ${ap.derived_from}</span></div>`);
+                rt.added_productions.forEach(ap => s += `<div class="rule-item addition">Generated: ${ap.rule} <span style="font-size:0.8em;opacity:0.7">via ${ap.derived_from}</span></div>`);
                 return s;
-            }).join('') + `</div>`;
+            }).join('<hr style="border:0;border-top:1px dashed #333;margin:4px 0;">') + `</div>`;
         }
         else if (log.type === "phase1" || log.type === "phase2") {
             details = `<div class="rule-list">`;
@@ -272,6 +276,30 @@ function renderStats(beforeGrammar, afterGrammar, containerId) {
     `;
     
     document.getElementById(containerId).innerHTML = html;
+}
+
+function renderSets(sets, stage, containerId) {
+    const container = document.getElementById(containerId);
+    if (!sets || !container) return;
+    
+    let html = '';
+    container.classList.add('active');
+    
+    if (stage === 1 || stage === 4) {
+        let gSet = sets.generating ? sets.generating.join(', ') : 'Ø';
+        let rSet = sets.reachable ? sets.reachable.join(', ') : 'Ø';
+        html += `<div class="set-line"><span class="set-label">Generating Set (G):</span> { ${gSet} }</div>`;
+        html += `<div class="set-line"><span class="set-label">Reachable Set (R):</span> { ${rSet} }</div>`;
+    } else if (stage === 2) {
+        let nSet = sets.nullable && sets.nullable.length > 0 ? sets.nullable.join(', ') : 'Ø';
+        html += `<div class="set-line"><span class="set-label">Nullable Set (N):</span> { ${nSet} }</div>`;
+    } else if (stage === 3) {
+        html += `<div class="set-line"><span class="set-label">Derivation Closures:</span></div>`;
+        for (let k in sets.closures) {
+            html += `<div class="set-line" style="margin-left:15px; font-size: 0.95rem;">D(${k}) = { ${sets.closures[k].join(', ')} }</div>`;
+        }
+    }
+    container.innerHTML = html;
 }
 
 // Diff Graph network render function
@@ -398,17 +426,29 @@ function runFullPipeline() {
     const s4 = remove_useless_symbols(deepCopy(s3.grammar));
     
     pipelineStates = [
-        { grammar: initG, logs: null },
-        { grammar: s1.grammar, logs: s1.step_logs },
-        { grammar: s2.grammar, logs: s2.step_logs },
-        { grammar: s3.grammar, logs: s3.step_logs },
-        { grammar: s4.grammar, logs: s4.step_logs },
+        { grammar: initG, logs: null, sets: null },
+        { grammar: s1.grammar, logs: s1.step_logs, sets: s1.stage_sets },
+        { grammar: s2.grammar, logs: s2.step_logs, sets: s2.stage_sets },
+        { grammar: s3.grammar, logs: s3.step_logs, sets: s3.stage_sets },
+        { grammar: s4.grammar, logs: s4.step_logs, sets: s4.stage_sets },
     ];
 }
 
 function processAllStepsAndRender() {
+    const initG = parseGrammar(DOM.cfgInput.value);
+    if (!initG || Object.keys(initG).length === 0) {
+        alert("Error: Grammar is empty. Please enter valid rules.");
+        return;
+    }
+    if (!initG['S']) {
+        alert("Error: Start symbol 'S' is missing! The grammar must contain a rule for 'S'.");
+        return;
+    }
+
     DOM.pipelineResults.classList.remove('hidden');
     runFullPipeline();
+    
+    DOM.btnExportReport.style.display = 'inline-block';
     
     // STEP 1: Useless
     DOM.u1Logs.innerHTML = buildHtmlLogs(pipelineStates[1].logs);
@@ -477,6 +517,138 @@ DOM.btnLoadExample.addEventListener('click', () => {
 DOM.btnClear.addEventListener('click', () => {
     DOM.cfgInput.value = '';
     DOM.pipelineResults.classList.add('hidden');
+    DOM.btnExportReport.style.display = 'none';
+});
+
+// Export Report
+DOM.btnExportReport.addEventListener('click', () => {
+    if (!pipelineStates || pipelineStates.length === 0) return;
+    
+    let html = `
+    <div style="font-family: 'Outfit', Helvetica, sans-serif; color: #000; background: #fff; width: 800px; padding: 20px;">
+        <h1 style="text-align:center; color:#111; border-bottom:2px solid #333; padding-bottom:10px; margin-bottom: 20px;">CFG Simplification Comprehensive Document</h1>`;
+    
+    const stageNames = [
+        "Stage 0: Original Input Grammar",
+        "Stage 1: Useless Symbols (Initial Sweep)",
+        "Stage 2: Null Productions Removal",
+        "Stage 3: Unit Productions Removal",
+        "Stage 4: Final Cleanup Sweep"
+    ];
+
+    pipelineStates.forEach((state, i) => {
+        let pageBreak = i > 0 && i < 4 ? 'page-break-after: always;' : '';
+        html += `<div style="${pageBreak} margin-bottom: 30px;">`;
+        html += `<h2 style="color:#2b6cb0; border-bottom:1px solid #ccc; padding-bottom:5px;">${stageNames[i]}</h2>`;
+
+        // Render detailed transformations
+        if (state.logs && state.logs.length > 0) {
+            html += `<h3 style="color:#333; font-size:16px; margin-bottom:10px;">Rule Tracking & Justifications</h3>`;
+            html += `<div style="font-size:12px; font-family:'Fira Code', monospace; line-height:1.6; margin-bottom:15px;">`;
+            state.logs.forEach(log => {
+                if (log.type === "phase1" || log.type === "phase2" || log.type === "production_generation" || log.type === "unit_replacement") {
+                    html += `<div style="margin-bottom:10px; border-left:3px solid #cbd5e1; padding-left:10px;">`;
+                    html += `<strong style="color:#0f172a; font-family:'Outfit', Helvetica, sans-serif; font-size: 14px;">${log.title}</strong><br>`;
+                    
+                    if (log.type === "phase1" || log.type === "phase2") {
+                        if (log.removed_rules && log.removed_rules.length > 0) {
+                            log.removed_rules.forEach(rr => {
+                                html += `<span style="color:#b91c1c;">[-] Removed: ${rr.original_rule}</span> <em style="color:#64748b;">(${rr.reason})</em><br>`;
+                            });
+                        } else {
+                            html += `<span style="color:#4b5563;">No rules removed in this specific sweep.</span><br>`;
+                        }
+                    } else if (log.type === "production_generation" && log.rule_transformations) {
+                        log.rule_transformations.forEach(rt => {
+                            html += `<div style="margin-top:5px; padding:5px; background:#f8fafc; border:1px solid #e2e8f0;">`;
+                            html += `Context Rule: <strong>${rt.original_rule}</strong><br>`;
+                            rt.generated_rules.forEach(gr => {
+                            let isKept = gr.type === 'original';
+                            let symbol = isKept ? '[=]' : '[+]';
+                            let color = isKept ? '#475569' : '#15803d';
+                            html += `<span style="color:${color}; margin-left:15px;">↳ ${symbol} ${isKept ? 'Kept' : 'Generated'}: ${gr.rule}</span> <em style="color:#64748b;">(${gr.reason})</em><br>`;
+                            });
+                            html += `</div>`;
+                        });
+                    } else if (log.type === "unit_replacement" && log.rule_transformations) {
+                        log.rule_transformations.forEach(rt => {
+                            html += `<div style="margin-top:5px; padding:5px; background:#f8fafc; border:1px solid #e2e8f0;">`;
+                            html += `Variable target: <strong>${rt.non_terminal}</strong><br>`;
+                            rt.removed_units.forEach(ru => html += `<span style="color:#b91c1c; margin-left:15px;">↳ [-] Removed unit: ${ru}</span><br>`);
+                            rt.added_productions.forEach(ap => html += `<span style="color:#15803d; margin-left:15px;">↳ [+] Generated: ${ap.rule}</span> <em style="color:#64748b;">(via ${ap.derived_from})</em><br>`);
+                            html += `</div>`;
+                        });
+                    }
+                    html += `</div>`;
+                }
+            });
+            html += `</div>`;
+        }
+        
+        // Render Resuling Grammar
+        html += `<div style="background:#f4f4f5; padding:15px; border-radius:5px; margin-bottom:15px; border:1px solid #e4e4e7;">`;
+        html += `<h3 style="margin-top:0; color:#111; font-size:16px;">Resulting Grammar (G${i})</h3>`;
+        html += `<pre style="font-family:'Fira Code', monospace; margin:0; font-size:14px; color:#111; line-height:1.5;">`;
+        let ruleCount = 0;
+        for (let k in state.grammar) {
+            let rhs = state.grammar[k].map(x => x === '' ? 'ε' : x).join(' | ');
+            if (rhs) {
+                html += `<strong>${k}</strong> → ${rhs}\n`;
+                ruleCount++;
+            }
+        }
+        if (ruleCount === 0) html += `<span style="color:#ef4444;">Language is empty (No rules left)</span>`;
+        html += `</pre></div>`;
+        
+        html += `</div>`;
+    });
+
+    html += `</div>`;
+
+    const dsName = "CFG_Comprehensive_Report.pdf";
+    
+    const styles = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Fira+Code&display=swap');
+            body { font-family: 'Outfit', Helvetica, sans-serif; color: #000; background: #fff; padding: 40px; }
+            h1, h2, h3 { color: #111; margin-top: 25px; border-bottom: 2px solid #eee; padding-bottom: 8px; }
+            h2 { color: #2b6cb0; }
+            pre, code { font-family: 'Fira Code', 'Courier New', monospace; font-size: 13px; background: #f8fafc; padding: 15px; border: 1px solid #e2e8f0; border-radius: 5px; white-space: pre-wrap; display: block; }
+            .token-removed { color: #b91c1c; text-decoration: line-through; }
+            .token-added { color: #15803d; font-weight: bold; }
+            div { margin-bottom: 15px; }
+            @media print {
+                .page-break { page-break-after: always; }
+                body { padding: 0; }
+            }
+        </style>
+    `;
+
+    const printWindow = window.open('', '_blank', 'width=900,height=800');
+    if (!printWindow) {
+        alert("Pop-up blocked! Please allow pop-ups to download the report.");
+        return;
+    }
+    
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>CFG Simplification Report</title>
+            ${styles}
+        </head>
+        <body>
+            ${html}
+            <script>
+                window.onload = function() {
+                    window.print();
+                    // window.close(); // Optional: close window after printing
+                };
+            </script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
 });
 
 // Dynamic Rule Builder

@@ -240,3 +240,48 @@ select.builder-input { border-right: 12px solid transparent; cursor: pointer; co
 #step-3.animate-panel { animation-delay: 0.5s; }
 #step-4.animate-panel { animation-delay: 0.7s; }
 #step-5.animate-panel { animation-delay: 0.9s; }
+
+
+.stage-sets-box {
+    background: #111;
+    border-left: 3px solid #3b82f6;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 0 4px 4px 0;
+    font-family: 'Fira Code', monospace;
+    font-size: 1.05rem;
+    color: #e2e8f0;
+    display: none;
+}
+.stage-sets-box.active {
+    display: block;
+}
+.stage-sets-box .set-line { margin-bottom: 8px; }
+.stage-sets-box .set-line:last-child { margin-bottom: 0; }
+.set-label { color: #888; font-weight: bold; margin-right: 10px; }
+
+.algo-details {
+    background: #0a0a0a;
+    border: 1px solid #222;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+.algo-details summary {
+    padding: 12px 15px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #aaa;
+    background: #111;
+    user-select: none;
+}
+.algo-details summary:hover { background: #1a1a1a; color: #fff; }
+.algo-details pre {
+    padding: 15px;
+    color: #888;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+

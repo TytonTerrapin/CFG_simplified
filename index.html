@@ -6,6 +6,7 @@
     <title>CFG Simplifier</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -109,6 +110,21 @@ D -> d"></textarea>
                     <p class="subtitle">Eliminates non-productive symbols and symbols unreachable from the start state.</p>
                     <div class="stage-stats" id="u1-stats"></div>
                     
+                    <div class="stage-sets-box" id="u1-sets"></div>
+                    <details class="algo-details">
+                        <summary>Algorithm: Remove Useless Symbols</summary>
+                        <pre>
+1. Compute Generating Set (G) [Productive Symbols]:
+   - Add all variables that directly derive strings of terminals.
+   - Iteratively add variables that derive strings of symbols currently in G.
+   - Remove any rules containing symbols not in G.
+2. Compute Reachable Set (R):
+   - Start with R = {S}.
+   - Iteratively add any variable that appears on RHS of rules mapped from variables in R.
+   - Remove any rules for variables not in R.
+                        </pre>
+                    </details>
+                    
                     <div class="dashboard-grid full-width">
                         <div class="logs-pane">
                             <h3>Algorithmic Traces</h3>
@@ -138,6 +154,20 @@ D -> d"></textarea>
                     <h2>Stage 2: Null Productions Removal</h2>
                     <p class="subtitle">Identifies nullable non-terminals (deriving <code>?</code>) and dynamically generates alternative non-null productions.</p>
                     <div class="stage-stats" id="null-stats"></div>
+                    
+                    <div class="stage-sets-box" id="null-sets"></div>
+                    <details class="algo-details">
+                        <summary>Algorithm: Remove ε-Productions</summary>
+                        <pre>
+1. Compute Nullable Set (N):
+   - Add variables that directly derive ε.
+   - Iteratively add variables that derive strings entirely composed of symbols in N.
+2. For each rule containing symbols in N:
+   - Generate combinations replacing each occurrence with ε.
+   - Add newly generated rules explicitly.
+   - Remove all ε-productions from the grammar.
+                        </pre>
+                    </details>
                     
                     <div class="dashboard-grid full-width">
                         <div class="logs-pane">
@@ -169,6 +199,19 @@ D -> d"></textarea>
                     <p class="subtitle">Eliminates <code>A → B</code> transitions by determining derivation closures and making direct substitutions.</p>
                     <div class="stage-stats" id="unit-stats"></div>
                     
+                    <div class="stage-sets-box" id="unit-sets"></div>
+                    <details class="algo-details">
+                        <summary>Algorithm: Remove Unit Productions</summary>
+                        <pre>
+1. Compute Derivation Closure D(A) for every variable:
+   - Initialize D(A) = {A}.
+   - If B is in D(A) and there is a unit rule B → C, add C to D(A).
+2. For each variable A:
+   - For every variable B in D(A), map all non-unit rules of B to A.
+   - Remove the original unit rules (A → B).
+                        </pre>
+                    </details>
+                    
                     <div class="dashboard-grid full-width">
                         <div class="logs-pane">
                             <h3>Algorithmic Traces</h3>
@@ -198,6 +241,14 @@ D -> d"></textarea>
                     <h2>Stage 4: Final Cleanup (Emerging Useless Symbols)</h2>
                     <p class="subtitle">A final sweep to remove any symbols that became unreachable or non-productive during the null/unit phases.</p>
                     <div class="stage-stats" id="u2-stats"></div>
+
+                    <div class="stage-sets-box" id="u2-sets"></div>
+                    <details class="algo-details">
+                        <summary>Algorithm: Final Sweep</summary>
+                        <pre>
+Applied same Algorithm as Stage 1 to collect newly isolated symbols and prune the final grammar tree.
+                        </pre>
+                    </details>
                     
                     <div class="dashboard-grid full-width">
                         <div class="logs-pane">
@@ -256,7 +307,8 @@ D -> d"></textarea>
                         <div id="dynamic-network" class="network-canvas" style="height: 450px;"></div>
                     </div>
 
-                    <div class="panel-actions center-actions">
+                    <div class="panel-actions center-actions" style="flex-direction: column; align-items: center; gap: 1rem;">
+                        <button class="btn btn-secondary btn-large" id="btn-export-report" style="display:none; background: #3b82f6; border-color: #2563eb; color: #fff;">📥 Download Comprehensive PDF Report</button>
                         <button class="btn btn-primary btn-large" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Back to Top</button>
                     </div>
                 </section>
