@@ -69,6 +69,8 @@ D -> d"></textarea>
                                 <option value="nulls">Heavy Nulls (Cascading)</option>
                                 <option value="units">Deep Unit Chains</option>
                                 <option value="useless">Unreachable & Non-Productive</option>
+                                <option value="complex1">Large Interconnected Grammar</option>
+                                <option value="complex2">Deep Cascading Nulls/Units</option>
                             </select>
                             <button class="btn btn-secondary" id="btn-load-example">Load</button>
                             <button class="btn btn-secondary" id="btn-clear" style="border-color: var(--danger); color: var(--danger);">Clear</button>
@@ -313,7 +315,7 @@ Applied same Algorithm as Stage 1 to collect newly isolated symbols and prune th
                     </div>
 
                     <div class="panel-actions center-actions" style="flex-direction: column; align-items: center; gap: 1rem;">
-                        <button class="btn btn-secondary btn-large" id="btn-export-report" style="display:none; background: #3b82f6; border-color: #2563eb; color: #fff;">📥 Download Comprehensive PDF Report</button>
+                        <button class="btn btn-secondary btn-large" id="btn-export-report" style="display:none;">↓ Download Comprehensive PDF Report</button>
                         <button class="btn btn-primary btn-large" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Back to Top</button>
                     </div>
                 </section>

@@ -59,7 +59,9 @@ const EXAMPLES = {
     general: "S -> ABaC\nA -> BC\nB -> b | ?\nC -> D | ?\nD -> d",
     nulls: "S -> ABC\nA -> a | ?\nB -> b | ?\nC -> c | ?",
     units: "S -> A\nA -> B\nB -> C\nC -> D\nD -> a | b",
-    useless: "S -> AB | C\nA -> a\nB -> bA\nC -> cC\nD -> d" 
+    useless: "S -> AB | C\nA -> a\nB -> bA\nC -> cC\nD -> d",
+    complex1: "S -> ABCD | EFG\nA -> aA | B | ?\nB -> bB | C | ?\nC -> cC | D | ?\nD -> dD | a | ?\nE -> eE | F\nF -> fF | G\nG -> gG | E | ?\nH -> hH | I\nI -> iI | H | ?\nJ -> KL | M\nK -> kK | ?\nL -> lL | ?\nM -> mM | N\nN -> nN | ?\nO -> p",
+    complex2: "S -> XYZ | UVW\nX -> Y | a\nY -> Z | b\nZ -> X | c | ?\nU -> V | d\nV -> W | e\nW -> U | f | ?\nA -> B | C\nB -> D | E\nC -> F | G\nD -> x | ?\nE -> y | ?\nF -> z | ?\nG -> w | ?"
 };
 
 let pipelineStates = []; 
