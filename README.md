@@ -6,6 +6,9 @@ CFG Simplifier is an interactive, web-based tool designed to visualize and perfo
 
 Live demo: https://tytonterrapin.github.io/CFG_Simplified/
 
+
+Link 2: https://cfg-simplified.vercel.app/
+
 Deployment: Hosted using Vercel for zero-config static deployment from this repository. Changes pushed to the main branch are auto-deployed.
 
 The simplification process rigorously applies four standard algorithmic phases to guarantee that the grammar maintains its original language without any redundant rules.
