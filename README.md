@@ -4,6 +4,15 @@
 
 ---
 
+### 🌐 Live Deployment
+- **GitHub Pages**: [Live Demo](https://tytonterrapin.github.io/CFG_Simplified/)
+- **Vercel Mirror**: [Alternative Link](https://cfg-simplified.vercel.app/)
+
+> [!NOTE]
+> Changes pushed to the `main` branch are automatically deployed via Vercel for zero-config static hosting.
+
+---
+
 ## 🚀 Key Capabilities
 
 - **Strict Algorithmic Precision**: Implements the standard four-stage simplification pipeline used in formal language theory.
