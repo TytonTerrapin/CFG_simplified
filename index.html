@@ -19,31 +19,129 @@
 
         <main id="app-content">
             
-            <!-- THEORY SECTION -->
             <section class="theory-section">
-                <div class="theory-header">
-                    <h2>Theory of CFG Simplification</h2>
-                    <p>To safely minimize a Context-Free Grammar without changing the language it generates, we apply systematic algorithms in a specific pipeline order. Explore the theory below before trying it yourself.</p>
+                <div class="theory-header" style="margin-bottom: 4rem;">
+                    <h2>Context-Free Grammar Theory</h2>
+                    <p class="theory-subtitle">A <span class="highlight">Context-Free Grammar (CFG)</span> is a formal system used to generate all possible strings in a language. While powerful, raw grammars often contain <span class="highlight">structural overhead</span> that hinders parsing performance.</p>
                 </div>
+
+                <div class="theory-header" style="text-align: left; margin-bottom: 2rem;">
+                    <h3>01. Core Foundations</h3>
+                    <p style="margin: 0; color: #666;">The specialized components that make up any formal grammar.</p>
+                </div>
+
+                <div class="definition-grid">
+                    <div class="definition-card">
+                        <h4>Variables <span class="symbol">V</span></h4>
+                        <p>Recursive building blocks (e.g., <span class="highlight">S, A, B</span>) that act as placeholders for larger structures.</p>
+                    </div>
+                    <div class="definition-card">
+                        <h4>Terminals <span class="symbol">Σ</span></h4>
+                        <p>The "leaf" nodes (e.g., <span class="highlight">a, b, 0, 1</span>) that cannot be further expanded. These form the actual strings.</p>
+                    </div>
+                    <div class="definition-card">
+                        <h4>Productions <span class="symbol">P</span></h4>
+                        <p>Substitution rules defined as <span class="highlight">LHS → RHS</span>. The LHS must be a single Variable.</p>
+                    </div>
+                </div>
+
+                <div class="theory-divider"></div>
+
+                <div class="theory-header" style="text-align: left; margin-bottom: 2rem;">
+                    <h3>02. The Simplification Pipeline</h3>
+                    <p style="margin: 0; color: #666;">Correct order matters. We must remove nulls and units before pruning useless symbols.</p>
+                </div>
+
                 <div class="theory-grid">
                     <div class="theory-card">
                         <div class="theory-icon">1</div>
-                        <h3>Useless Symbols</h3>
-                        <p>We eliminate variables that don't produce outcomes.<br><br>
-                        <strong>Phase 1: Non-Productive.</strong> Remove variables that never derive a string consisting only of terminals.<br>
-                        <strong>Phase 2: Unreachable.</strong> From the Start symbol (S), build a reachable graph and remove anything disconnected.</p>
+                        <h3>Elimination of ε-Rules</h3>
+                        <p>
+                            Removes rules that derive the empty string (<span class="concept-badge">A → ε</span>).
+                            <br><br>
+                            <strong>Procedure:</strong> Find all <span class="highlight">Nullable</span> variables and generate power-set combinations for each rule.
+                        </p>
+                        <button class="concept-btn" onclick="populateExample('nulls')">Load ε-Example</button>
                     </div>
+
                     <div class="theory-card">
                         <div class="theory-icon">2</div>
-                        <h3>Null Productions</h3>
-                        <p>We remove productions that derive the empty string (<code>?</code> or <code>ε</code>).<br><br>
-                        First, we identify "nullable" variables. Then, for any rule containing these variables, we generate combinations of sub-rules substituting those variables with the empty string, allowing us to safely omit <code>A → ?</code>.</p>
+                        <h3>Elimination of Unit Rules</h3>
+                        <p>
+                            Removes "alias" transitions like <span class="concept-badge">A → B</span>.
+                            <br><br>
+                            <strong>Procedure:</strong> Compute the derivation closure for each variable and substitute rules directly.
+                        </p>
+                        <button class="concept-btn" onclick="populateExample('units')">Load Unit Example</button>
                     </div>
+
                     <div class="theory-card">
                         <div class="theory-icon">3</div>
-                        <h3>Unit Productions</h3>
-                        <p>We streamline the grammar by collapsing direct variable-to-variable chains (e.g., <code>A → B</code>).<br><br>
-                        We calculate a "derivation closure" for every variable, and directly substitute <code>B</code>'s non-unit derivations into <code>A</code>, completely removing the intermediate step.</p>
+                        <h3>Useless Symbols Pruning</h3>
+                        <p>
+                            Deletes symbols that never produce terminals or are unreachable from the Start symbol.
+                            <br><br>
+                            <strong>Procedure:</strong> Two-pass sweep: First <span class="highlight">Generating</span>, then <span class="highlight">Reachable</span>.
+                        </p>
+                        <button class="concept-btn" onclick="populateExample('useless')">Load Useless Example</button>
+                    </div>
+                </div>
+
+                <div class="theory-divider"></div>
+
+                <div class="theory-header" style="text-align: left; margin-bottom: 2rem;">
+                    <h3>03. Visual Case Study</h3>
+                    <p style="margin: 0; color: #666;">Observe how a complex grammar is synthesized into its most efficient form.</p>
+                </div>
+
+                <table class="before-after-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Original Rule</th>
+                            <th>Transformation Logic</th>
+                            <th>Simplified Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="highlight">Nulls</span></td>
+                            <td><code>A → a | ε</code></td>
+                            <td>Propagate <code>ε</code> to all parents</td>
+                            <td><code>A → a</code></td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">Units</span></td>
+                            <td><code>S → A</code></td>
+                            <td>Substitute <code>A</code>'s RHS into <code>S</code></td>
+                            <td><code>S → a</code></td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">Useless</span></td>
+                            <td><code>B → b</code></td>
+                            <td>If <code>B</code> is never reached from <code>S</code></td>
+                            <td><span style="color:var(--danger)">(Removed)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="apps-section">
+                    <div class="theory-header" style="margin-bottom: 2rem;">
+                        <h3>Why do we simplify?</h3>
+                    </div>
+                    <div class="apps-grid">
+                        <div class="app-item">
+                            <h4>Compiler Efficiency</h4>
+                            <p>Reduces the depth of <span class="highlight">Abstract Syntax Trees (ASTs)</span>, leading to faster semantic analysis and code generation.</p>
+                        </div>
+                        <div class="app-item">
+                            <h4>Language Design</h4>
+                            <p>Ensures that the defined language is clean, non-ambiguous, and easier for humans and machines to parse.</p>
+                        </div>
+                        <div class="app-item">
+                            <h4>Normalization Forms</h4>
+                            <p>A required step for <span class="highlight">Chomsky Normal Form</span> conversion, enabling algorithms like CYK to work in O(n³) time.</p>
+                        </div>
                     </div>
                 </div>
             </section>

@@ -792,45 +792,48 @@ function updateMorphingGraph(beforeGrammar, afterGrammar, forceReload = false) {
         networkInstances['dynamic-network'] = dynamicNetworkInstance;
     }
 }
+// Export populateExample to window for theory buttons
+window.populateExample = function(type) {
+    if (EXAMPLES[type]) {
+        DOM.cfgInput.value = EXAMPLES[type];
+        // Visual feedback
+        DOM.cfgInput.style.borderColor = 'var(--success)';
+        setTimeout(() => DOM.cfgInput.style.borderColor = '#333', 1000);
+        // Scroll to editor
+        document.getElementById('step-0').scrollIntoView({ behavior: 'smooth' });
+    }
+};
 
-// Centeralized Reset Graph Handler
+// Centralized Reset Graph Handler
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('btn-reset-graph')) {
         const networkId = e.target.getAttribute('data-network');
         
-        if (networkId === 'dynamic-network') {
-            // Re-render the dynamic network at current stage
+        if (networkInstances[networkId]) {
+            networkInstances[networkId].fit({ animation: { duration: 1000, easingFunction: 'easeInOutQuad' } });
+        }
+        
+        if (networkId === 'dynamic-network' && pipelineStates.length > 0) {
+            // Re-render the dynamic network at current stage to fix potential vis-network glitches
             const stage = currentPlaybackStage;
             const before = stage === 0 ? pipelineStates[0].grammar : pipelineStates[stage - 1].grammar;
             const after = pipelineStates[stage].grammar;
             updateMorphingGraph(before, after, true);
-        } else {
-            // Re-render static diff graphs for Stage 1-4
-            const stageMap = {
-                'u1-network': [0, 1],
-                'null-network': [1, 2],
-                'unit-network': [2, 3],
-                'u2-network': [3, 4]
-            };
-            const indices = stageMap[networkId];
-            if (indices && pipelineStates.length > 0) {
-                const container = document.getElementById(networkId);
-                renderGrammarDiffGraph(pipelineStates[indices[0]].grammar, pipelineStates[indices[1]].grammar, container);
-            }
         }
     }
 });
 
 function updateDynamicPlayback() {
-    DOM.graphStageLabel.innerText = STAGE_LABELS[currentPlaybackStage];
-    DOM.btnPrevGraph.disabled = currentPlaybackStage === 0;
-    DOM.btnNextGraph.disabled = currentPlaybackStage === 4;
+    if (pipelineStates.length === 0) return;
     
-    if (currentPlaybackStage === 0) {
-        updateMorphingGraph(pipelineStates[0].grammar, pipelineStates[0].grammar);
-    } else {
-        updateMorphingGraph(pipelineStates[currentPlaybackStage - 1].grammar, pipelineStates[currentPlaybackStage].grammar);
-    }
+    const before = currentPlaybackStage === 0 ? pipelineStates[0].grammar : pipelineStates[currentPlaybackStage - 1].grammar;
+    const after = pipelineStates[currentPlaybackStage].grammar;
+    
+    DOM.graphStageLabel.innerText = STAGE_LABELS[currentPlaybackStage];
+    updateMorphingGraph(before, after);
+    
+    DOM.btnPrevGraph.disabled = currentPlaybackStage === 0;
+    DOM.btnNextGraph.disabled = currentPlaybackStage === STAGE_LABELS.length - 1;
 }
 
 DOM.btnPrevGraph.addEventListener('click', () => {
@@ -839,8 +842,9 @@ DOM.btnPrevGraph.addEventListener('click', () => {
         updateDynamicPlayback();
     }
 });
+
 DOM.btnNextGraph.addEventListener('click', () => {
-    if (currentPlaybackStage < 4) {
+    if (currentPlaybackStage < STAGE_LABELS.length - 1) {
         currentPlaybackStage++;
         updateDynamicPlayback();
     }

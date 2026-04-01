@@ -56,6 +56,186 @@ header p { color: var(--text-secondary); font-size: 1.15rem; }
 .theory-card p, .theory-card strong { color: #999; font-size: 0.95rem; line-height: 1.6; font-weight: 400; }
 .theory-card strong { color: #ccc; font-weight: 600; }
 
+.highlight {
+    color: var(--success);
+    font-weight: 600;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.theory-subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 3rem;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Definition Grid */
+.definition-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 4rem;
+}
+
+.definition-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.definition-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.definition-card h4 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.definition-card .symbol {
+    font-family: 'Fira Code', monospace;
+    color: var(--success);
+    background: rgba(16, 185, 129, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.definition-card p {
+    color: #888;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Apps Section */
+.apps-section {
+    margin-top: 4rem;
+    padding-top: 3rem;
+    border-top: 1px solid #222;
+}
+
+.apps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.app-item h4 {
+    color: #fff;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.app-item p {
+    color: #777;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* New Theory Enhancements */
+.theory-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, #222, transparent);
+    margin: 4rem 0;
+}
+
+.pro-tip {
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    padding: 1.2rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+.pro-tip .icon {
+    font-size: 1.2rem;
+    color: var(--success);
+}
+
+.pro-tip p {
+    color: #888;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.before-after-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    background: #0a0a0a;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #222;
+}
+
+.before-after-table th, .before-after-table td {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid #111;
+}
+
+.before-after-table th {
+    background: #111;
+    color: #888;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.before-after-table td {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.95rem;
+    color: #ccc;
+}
+
+.before-after-table code {
+    color: var(--success);
+}
+
+.concept-btn {
+    background: transparent;
+    border: 1px solid #333;
+    color: #888;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+}
+
+.concept-btn:hover {
+    border-color: var(--success);
+    color: #fff;
+}
+
+.concept-badge {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    color: #ffd700; /* Gold/Yellow for badges */
+}
+
 /* Panels */
 .panel {
     display: flex;
