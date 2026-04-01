@@ -108,7 +108,7 @@ function parseGrammar(text) {
         const lhs = parts[0].trim();
         if (!lhs) continue;
         const rhsRawToken = line.substring(line.indexOf(separator) + separator.length).trim();
-        const rhsRaw = rhsRawToken.split('|').map(s => s.trim());
+        const rhsRaw = rhsRawToken.split(/[|\/]/).map(s => s.trim());
         const rhs = rhsRaw.map(s => emptyTokens.includes(s) ? "" : s);
         if (!grammar[lhs]) grammar[lhs] = [];
         grammar[lhs].push(...rhs);
