@@ -1,4 +1,4 @@
-# CFG Simplified 2.0
+# CFG Simplified 
 
 **CFG Simplified** is a high-fidelity, interactive web application designed to demonstrate and perform the formal simplification of **Context-Free Grammars (CFGs)**. It bridges the gap between theoretical computer science and practical tooling by providing a real-time, state-first execution trace of the transformation pipeline.
 
