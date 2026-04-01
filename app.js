@@ -264,7 +264,14 @@ function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container) {
         let color = status === 'added' ? '#10b981' : (status === 'removed' ? '#ef4444' : '#555');
         visEdges.add({ from, to, arrows: 'to', color: { color }, dashes: status === 'removed', width: status === 'kept' ? 1 : 2.5 });
     });
-    networkInstances[container.id] = new vis.Network(container, { nodes: visNodes, edges: visEdges }, { physics: { stabilization: true }, interaction: { zoomView: false } });
+    networkInstances[container.id] = new vis.Network(container, { nodes: visNodes, edges: visEdges }, { 
+        physics: { stabilization: true }, 
+        interaction: { 
+            zoomView: true, 
+            dragView: true,
+            hover: true
+        } 
+    });
 }
 
 // --- Pipeline Control ---
