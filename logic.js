@@ -1,22 +1,27 @@
-function isUpper(sym) {
-    return sym.length === 1 && sym === sym.toUpperCase() && sym !== sym.toLowerCase();
-}
-
-function getCombinations(arr, r) {
-    const result = [];
-    function backtrack(start, combo) {
-        if (combo.length === r) {
-            result.push([...combo]);
-            return;
-        }
-        for (let i = start; i < arr.length; i++) {
-            combo.push(arr[i]);
-            backtrack(i + 1, combo);
-            combo.pop(); // backtracking
+function _calculate_metrics(grammar) {
+    let productions = 0;
+    const variables = new Set(Object.keys(grammar));
+    const terminals = new Set();
+    
+    for (const lhs in grammar) {
+        for (const rhs of grammar[lhs]) {
+            productions++;
+            if (rhs === '') continue;
+            for (let i = 0; i < rhs.length; i++) {
+                const char = rhs[i];
+                if (!isUpper(char) && char !== ' ' && char !== '|') {
+                    terminals.add(char);
+                } else if (isUpper(char)) {
+                    variables.add(char);
+                }
+            }
         }
     }
-    backtrack(0, []);
-    return result;
+    return {
+        productions,
+        variables: variables.size,
+        terminals: terminals.size
+    };
 }
 
 // -----------------------------------------
@@ -33,7 +38,13 @@ function remove_null_productions(grammar) {
     });
 
     if (nullable.size === 0) {
-        return { grammar, step_logs, stage_sets: { nullable: [] } };
+        return { 
+            stageName: "Null Productions Removal",
+            grammar, 
+            step_logs, 
+            stage_sets: { nullable: [] },
+            metrics: _calculate_metrics(grammar)
+        };
     }
 
     const original_grammar = JSON.parse(JSON.stringify(grammar));
@@ -118,9 +129,11 @@ function remove_null_productions(grammar) {
     });
 
     return { 
+        stageName: "Null Productions Removal",
         grammar, 
         step_logs, 
-        stage_sets: { nullable: Array.from(nullable) }
+        stage_sets: { nullable: Array.from(nullable) },
+        metrics: _calculate_metrics(grammar)
     };
 }
 
@@ -183,7 +196,13 @@ function remove_unit_productions(grammar) {
     });
 
     if (Object.keys(unit_prods).length === 0) {
-        return { grammar, step_logs, stage_sets: { closures: {} } };
+        return { 
+            stageName: "Unit Productions Removal",
+            grammar, 
+            step_logs, 
+            stage_sets: { closures: {} },
+            metrics: _calculate_metrics(grammar)
+        };
     }
 
     const graph = _build_unit_graph(grammar, unit_prods);
@@ -250,9 +269,11 @@ function remove_unit_productions(grammar) {
     });
 
     return { 
+        stageName: "Unit Productions Removal",
         grammar, 
         step_logs,
-        stage_sets: { closures: closureArrayFormat }
+        stage_sets: { closures: closureArrayFormat },
+        metrics: _calculate_metrics(grammar)
     };
 }
 
@@ -317,7 +338,7 @@ function _find_closure(graph, grammar) {
 // -----------------------------------------
 // 3. Remove Useless Symbols
 // -----------------------------------------
-function remove_useless_symbols(grammar) {
+function remove_useless_symbols(grammar, stageTitle = "Useless Symbols Removal") {
     const step_logs = [];
     const p1 = _phase1_remove_nonproductive(grammar);
     step_logs.push(p1);
@@ -326,12 +347,14 @@ function remove_useless_symbols(grammar) {
     step_logs.push(p2);
     
     return { 
+        stageName: stageTitle,
         grammar, 
         step_logs,
         stage_sets: {
             generating: p1.productive_symbols,
             reachable: p2.reachable_symbols
-        }
+        },
+        metrics: _calculate_metrics(grammar)
     };
 }
 
@@ -481,4 +504,28 @@ function _can_derive_terminals(production, productive) {
     return true;
 }
 
-export { remove_null_productions, remove_unit_productions, remove_useless_symbols };
+
+function isUpper(char) {
+    if (!char) return false;
+    const c = char[0];
+    return c >= 'A' && c <= 'Z';
+}
+
+function getCombinations(arr, k) {
+    const results = [];
+    function helper(start, combo) {
+        if (combo.length === k) {
+            results.push([...combo]);
+            return;
+        }
+        for (let i = start; i < arr.length; i++) {
+            combo.push(arr[i]);
+            helper(i + 1, combo);
+            combo.pop();
+        }
+    }
+    helper(0, []);
+    return results;
+}
+
+export { remove_null_productions, remove_unit_productions, remove_useless_symbols, _calculate_metrics, isUpper, getCombinations };

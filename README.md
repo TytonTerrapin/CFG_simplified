@@ -1,26 +1,24 @@
-# CFG Simplified
+# CFG Simplified 2.0
 
-**CFG Simplified** is a high-fidelity, interactive web application designed to demonstrate and perform the formal simplification of **Context-Free Grammars (CFGs)**. It bridges the gap between theoretical computer science and practical tooling by providing a real-time, step-by-step trace of the transformation pipeline.
+**CFG Simplified** is a high-fidelity, interactive web application designed to demonstrate and perform the formal simplification of **Context-Free Grammars (CFGs)**. It bridges the gap between theoretical computer science and practical tooling by providing a real-time, state-first execution trace of the transformation pipeline.
 
 ## Table of Contents
 1. [Key Capabilities](#key-capabilities)
 2. [The Simplification Pipeline](#the-simplification-pipeline)
-3. [Interactive Visualization](#interactive-visualization)
+3. [Modern UI & UX](#modern-ui--ux)
 4. [Grammar Syntax](#grammar-syntax)
 5. [Tech Stack](#tech-stack)
 6. [Getting Started](#getting-started)
-7. [Usage Guide](#usage-guide)
-8. [Architecture](#architecture)
-9. [License](#license)
+7. [Architecture](#architecture)
+8. [License](#license)
 
 ## Key Capabilities
 
+- **State-First Architecture**: Decouples algorithmic logic from rendering, maintaining a complete execution history of the grammar's evolution.
 - **Strict Algorithmic Precision**: Implements the standard four-stage simplification pipeline used in formal language theory.
-- **Real-Time Pipeline Tracing**: Observes the grammar's evolution through detailed logs and state-by-state comparisons.
-- **Morphing Dependency Graphs**: Visualizes symbol relationships and rule dependencies using a dynamic physics-based network.
-- **Educational Design**: Integrated theory sections and algorithmic explanations for students and researchers.
-- **Dynamic Rule Builder**: A GUI-based tool to construct grammars without manual text editing.
-- **Report Export**: Generate comprehensive PDF documents of the entire simplification trace.
+- **Real-Time Pipeline Tracing**: Observes the grammar's evolution through detailed, JSON-driven logs and state-by-state comparisons.
+- **High-Fidelity Dependency Graphs**: Visualizes symbol relationships and rule dependencies using a dynamic physics-based network with per-stage state captures.
+- **Professional PDF Reporting**: Generates data-driven, print-optimized documents using `jsPDF` and `AutoTable`, including embedded graph states.
 
 ## The Simplification Pipeline
 
@@ -44,13 +42,12 @@ Prunes redundant "chains" (e.g., $A \to B$):
 ### 4. Final Cleanup
 A secondary sweep using the **Useless Symbols** algorithm to catch any symbols that became isolated during the Null and Unit removal phases.
 
-## Interactive Visualization
+## Modern UI & UX
 
-The tool uses `vis-network` to render dynamic **Dependency Graphs**:
-- **Nodes**: Represent Non-Terminals ($A, B, C$) and Terminals ($a, b, c$).
-- **Edges**: Represent production dependencies (e.g., $A \to BC$ creates edges $A \to B$ and $A \to C$).
-- **Physics-Based Layout**: Uses a force-directed layout to naturally organize complex grammars.
-- **Visual Diffing**: Highlights rule additions/deletions across stages using color-coded nodes and edges.
+- **Floating Stage Navigator**: A persistent, glassmorphic sidebar allowing instant jumping between pipeline stages.
+- **Scroll Progress Bar**: Global position awareness with a sleek top-aligned progress indicator.
+- **IntersectionObserver Animations**: Sections smoothly slide and fade into view as you navigate the execution trace.
+- **Technical Blueprint Aesthetic**: A dark-mode, cyberpunk-inspired design with emerald highlights and glassmorphic blurs.
 
 ## Grammar Syntax
 
@@ -72,19 +69,19 @@ D -> d
 
 ## Tech Stack
 
-- **HTML5/CSS3**: Semantic structure with a modern dark-mode aesthetic.
+- **HTML5/CSS3**: Semantic structure with **Glassmorphism** and CSS custom properties.
 - **Vanilla JavaScript**: Pure ES6 modules for core logic and UI orchestration.
 - **vis-network**: Real-time force-directed graph rendering.
-- **html2pdf.js**: Client-side PDF generation for reports.
+- **jsPDF & AutoTable**: Professional programmatic PDF generation from JSON states.
 - **Fonts**: Outfit (UI), Fira Code (Monospace).
 
 ## Getting Started
 
 ### Running Locally
 
-Since this is a static project, you must serve it via a local web server to handle ES modules:
+Since this is a static project using ES modules, you must serve it via a local web server:
 
-**Option 1: Node.js**
+**Option 1: Node.js (Recommended)**
 ```bash
 npx serve .
 ```
@@ -94,28 +91,17 @@ npx serve .
 python -m http.server 8000
 ```
 
-**Option 3: VS Code**
-Open `index.html` and use the **Live Server** extension.
-
-## Usage Guide
-
-1. **Input Grammar**: Use the **Text Editor** or the **Dynamic Rule Builder**.
-2. **Execute**: Click "Execute Simplification Pipeline".
-3. **Analyze**: Scroll through the panels to see **Algorithmic Traces**, **Dependency Graphs**, and **Before/After Diffs**.
-4. **Playback**: Use the "Playback Controls" at the bottom to morph between stages in a single graph.
-5. **Export**: Use the "Download Report" button for a detailed PDF analysis.
-
 ## Architecture
 
 ### Logic Engine (`logic.js`)
-- **Iterative Fixed-Point**: Used for $G$ (Generating), $N$ (Nullable), and $R$ (Reachable) sets.
-- **Combinatorial Expansion**: Employs backtracking to generate production variations.
-- **Closure Computation**: Uses an adjacency-list graph to calculate unit derivation closures.
+The logic engine is now state-driven, returning standardized `StageRecord` objects. This allows for:
+- **Metrics Calculation**: Automated complexity tracking across every transformation.
+- **Algorithmic Justification**: Detailed logs of why specific rules were added or removed.
 
 ### UI Controller (`app.js`)
-- **State Management**: Tracks the grammar's state across 5 pipeline stages.
-- **Graph Morphing**: Synchronized rendering of dependency changes using `vis-network` datasets.
-- **Animation System**: Scroll-linked CSS animations for a smooth execution flow.
+- **Pipeline History**: Maintains a `pipelineHistory` array as the single source of truth for the entire run.
+- **State Capture**: Captures `vis-network` canvas states as PNGs for the PDF reporting system.
+- **Responsive Navigation**: Synchronizes the Stage Navigator with scroll position using `IntersectionObserver`.
 
 ## License
-Distributed under the **MIT License**. Created for educational exploration of Formal Language Theory.
+Distributed under the **MIT License**. Created for high-fidelity educational exploration of Formal Language Theory.

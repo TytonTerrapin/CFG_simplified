@@ -6,10 +6,23 @@
     <title>CFG Simplifier</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="stage-navigator" id="stage-navigator">
+        <div class="nav-item active" data-target="step-0" title="Grammar Input">0</div>
+        <div class="nav-item" data-target="step-1" title="Stage 1: Useless Symbols">1</div>
+        <div class="nav-item" data-target="step-2" title="Stage 2: Null Productions">2</div>
+        <div class="nav-item" data-target="step-3" title="Stage 3: Unit Productions">3</div>
+        <div class="nav-item" data-target="step-4" title="Stage 4: Final Cleanup">4</div>
+        <div class="nav-item" data-target="step-5" title="Summary & Replay">S</div>
+    </div>
+
+    <div class="scroll-progress-container">
+        <div class="scroll-progress-bar" id="scroll-progress"></div>
+    </div>
 
     <div class="container">
         <header>
@@ -19,7 +32,7 @@
 
         <main id="app-content">
             
-            <section class="theory-section">
+            <section class="theory-section" id="theory">
                 <div class="theory-header" style="margin-bottom: 4rem;">
                     <h2>Context-Free Grammar Theory</h2>
                     <p class="theory-subtitle">A <span class="highlight">Context-Free Grammar (CFG)</span> is a formal system used to generate all possible strings in a language. While powerful, raw grammars often contain <span class="highlight">structural overhead</span> that hinders parsing performance.</p>
@@ -147,7 +160,7 @@
             </section>
 
             <!-- STEP 0: INPUT -->
-            <section class="panel" id="step-0">
+            <section class="panel animate-on-scroll" id="step-0">
                 <h2>Define Your Context-Free Grammar</h2>
                 <p class="subtitle">Provide your rules using the text area or the dynamic rule builder. Use <code>?</code> or <code>''</code> for empty productions.</p>
                 
@@ -197,15 +210,15 @@ D -> d"></textarea>
                 </div>
             </section>
 
-            <!-- SCRolLABLE PIPELINE RESULTS -->
+            <!-- PIPELINE RESULTS -->
             <div id="pipeline-results" class="hidden">
                 <div class="pipeline-header">
                     <h2>Pipeline Execution Trace</h2>
-                    <p>Scroll down to review the Before & After states and visualizations for each algorithmic step.</p>
+                    <p>Observe the transition from complexity to strict efficiency.</p>
                 </div>
 
                 <!-- STEP 1: INITIAL USELESS SYMBOLS -->
-                <section class="panel" id="step-1">
+                <section class="panel animate-on-scroll" id="step-1">
                     <h2>Stage 1: Useless Symbols (Initial Sweep)</h2>
                     <p class="subtitle">Eliminates non-productive symbols and symbols unreachable from the start state.</p>
                     <div class="stage-stats" id="u1-stats"></div>
@@ -251,7 +264,7 @@ D -> d"></textarea>
                 </section>
 
                 <!-- STEP 2: NULL PRODUCTIONS -->
-                <section class="panel" id="step-2">
+                <section class="panel animate-on-scroll" id="step-2">
                     <h2>Stage 2: Null Productions Removal</h2>
                     <p class="subtitle">Identifies nullable non-terminals (deriving <code>?</code>) and dynamically generates alternative non-null productions.</p>
                     <div class="stage-stats" id="null-stats"></div>
@@ -296,7 +309,7 @@ D -> d"></textarea>
                 </section>
 
                 <!-- STEP 3: UNIT PRODUCTIONS -->
-                <section class="panel" id="step-3">
+                <section class="panel animate-on-scroll" id="step-3">
                     <h2>Stage 3: Unit Productions Removal</h2>
                     <p class="subtitle">Eliminates <code>A → B</code> transitions by determining derivation closures and making direct substitutions.</p>
                     <div class="stage-stats" id="unit-stats"></div>
@@ -340,7 +353,7 @@ D -> d"></textarea>
                 </section>
 
                 <!-- STEP 4: FINAL USELESS SYMBOLS -->
-                <section class="panel" id="step-4">
+                <section class="panel animate-on-scroll" id="step-4">
                     <h2>Stage 4: Final Cleanup (Emerging Useless Symbols)</h2>
                     <p class="subtitle">A final sweep to remove any symbols that became unreachable or non-productive during the null/unit phases.</p>
                     <div class="stage-stats" id="u2-stats"></div>
@@ -379,7 +392,7 @@ Applied same Algorithm as Stage 1 to collect newly isolated symbols and prune th
                 </section>
 
                 <!-- STEP 5: RESULT -->
-                <section class="panel" id="step-5">
+                <section class="panel animate-on-scroll" id="step-5">
                     <h2>Simplification Complete</h2>
                     <div class="success-banner">
                         <span class="icon-success">✔</span>
