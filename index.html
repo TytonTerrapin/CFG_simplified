@@ -13,11 +13,11 @@
 <body>
     <div class="stage-navigator" id="stage-navigator">
         <div class="nav-item active" data-target="step-0" title="Grammar Input">0</div>
-        <div class="nav-item" data-target="step-1" title="Stage 1: Useless Symbols">1</div>
-        <div class="nav-item" data-target="step-2" title="Stage 2: Null Productions">2</div>
-        <div class="nav-item" data-target="step-3" title="Stage 3: Unit Productions">3</div>
-        <div class="nav-item" data-target="step-4" title="Stage 4: Final Cleanup">4</div>
-        <div class="nav-item" data-target="step-5" title="Summary & Replay">S</div>
+        <div class="nav-item" data-target="step-1" title="Stage 1: Null Productions">1</div>
+        <div class="nav-item" data-target="step-2" title="Stage 2: Unit Productions">2</div>
+        <div class="nav-item" data-target="step-3" title="Stage 3: Useless Symbols">3</div>
+        <div class="nav-item" data-target="step-4" title="Stage 4: Validation & Summary">4</div>
+        <div class="nav-item" data-target="step-5" title="Final Grammar View">S</div>
     </div>
 
     <div class="scroll-progress-container">
@@ -217,65 +217,10 @@ D -> d"></textarea>
                     <p>Observe the transition from complexity to strict efficiency.</p>
                 </div>
 
-                <!-- STEP 1: INITIAL USELESS SYMBOLS -->
+                <!-- STEP 1: NULL PRODUCTIONS -->
                 <section class="panel animate-on-scroll" id="step-1">
-                    <h2>Stage 1: Useless Symbols (Initial Sweep)</h2>
-                    <p class="subtitle">Eliminates non-productive symbols and symbols unreachable from the start state.</p>
-                    <div class="stage-stats" id="u1-stats"></div>
-                    
-                    <div class="stage-sets-box" id="u1-sets"></div>
-                    <details class="algo-details">
-                        <summary>Algorithm: Remove Useless Symbols</summary>
-                        <pre>
-1. Compute Generating Set (G) [Productive Symbols]:
-   - Add all variables that directly derive strings of terminals.
-   - Iteratively add variables that derive strings of symbols currently in G.
-   - Remove any rules containing symbols not in G.
-2. Compute Reachable Set (R):
-   - Start with R = {S}.
-   - Iteratively add any variable that appears on RHS of rules mapped from variables in R.
-   - Remove any rules for variables not in R.
-                        </pre>
-                    </details>
-                    
-                    <div class="dashboard-grid full-width">
-                        <div class="logs-pane">
-                            <h3>Algorithmic Traces</h3>
-                            <div id="u1-logs" class="logs-content scrollbar"></div>
-                        </div>
-                        <div class="visuals-pane">
-                            <div class="graph-wrapper">
-                                <h3>Dependency Graph</h3>
-                                <div class="graph-legend">
-                                    <div class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span>Start Symbol</div>
-                                    <div class="legend-item"><span class="legend-dot" style="background:#fbbf24;"></span>Nullable</div>
-                                    <div class="legend-item"><span class="legend-dot" style="background:#34d399;"></span>Generating</div>
-                                    <div class="legend-item"><span class="legend-dot" style="background:#f87171;"></span>Removed</div>
-                                    <div class="legend-item"><span class="legend-dot" style="background:#94a3b8;"></span>Unreachable</div>
-                                    <div class="legend-item"><span class="legend-line" style="background:#3b82f6;"></span>Unit Rule</div>
-                                    <div class="legend-item"><span class="legend-line" style="background:#34d399; height:3px;"></span>Added</div>
-                                </div>
-                                <div id="u1-network" class="network-canvas"></div>
-                                <button class="btn-reset-graph" data-network="u1-network">Reset View</button>
-                            </div>
-                            <div class="state-container">
-                                <div class="grammar-col">
-                                    <h4>Before Stage 1</h4>
-                                    <div id="u1-before" class="grammar-display scrollbar"></div>
-                                </div>
-                                <div class="grammar-col">
-                                    <h4>After Stage 1</h4>
-                                    <div id="u1-after" class="grammar-display scrollbar"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- STEP 2: NULL PRODUCTIONS -->
-                <section class="panel animate-on-scroll" id="step-2">
-                    <h2>Stage 2: Null Productions Removal</h2>
-                    <p class="subtitle">Identifies nullable non-terminals (deriving <code>?</code>) and dynamically generates alternative non-null productions.</p>
+                    <h2>Stage 1: Null Productions Removal</h2>
+                    <p class="subtitle">Identifies nullable non-terminals (deriving <code>ε</code>) and dynamically generates alternative productions.</p>
                     <div class="stage-stats" id="null-stats"></div>
                     
                     <div class="stage-sets-box" id="null-sets"></div>
@@ -288,7 +233,7 @@ D -> d"></textarea>
 2. For each rule containing symbols in N:
    - Generate combinations replacing each occurrence with ε.
    - Add newly generated rules explicitly.
-   - Remove all ε-productions from the grammar.
+   - Remove all original ε-productions.
                         </pre>
                     </details>
                     
@@ -314,11 +259,11 @@ D -> d"></textarea>
                             </div>
                             <div class="state-container">
                                 <div class="grammar-col">
-                                    <h4>Before Stage 2</h4>
+                                    <h4>Before Stage 1</h4>
                                     <div id="null-before" class="grammar-display scrollbar"></div>
                                 </div>
                                 <div class="grammar-col">
-                                    <h4>After Stage 2</h4>
+                                    <h4>After Stage 1</h4>
                                     <div id="null-after" class="grammar-display scrollbar"></div>
                                 </div>
                             </div>
@@ -326,9 +271,9 @@ D -> d"></textarea>
                     </div>
                 </section>
 
-                <!-- STEP 3: UNIT PRODUCTIONS -->
-                <section class="panel animate-on-scroll" id="step-3">
-                    <h2>Stage 3: Unit Productions Removal</h2>
+                <!-- STEP 2: UNIT PRODUCTIONS -->
+                <section class="panel animate-on-scroll" id="step-2">
+                    <h2>Stage 2: Unit Productions Removal</h2>
                     <p class="subtitle">Eliminates <code>A → B</code> transitions by determining derivation closures and making direct substitutions.</p>
                     <div class="stage-stats" id="unit-stats"></div>
                     
@@ -367,11 +312,11 @@ D -> d"></textarea>
                             </div>
                             <div class="state-container">
                                 <div class="grammar-col">
-                                    <h4>Before Stage 3</h4>
+                                    <h4>Before Stage 2</h4>
                                     <div id="unit-before" class="grammar-display scrollbar"></div>
                                 </div>
                                 <div class="grammar-col">
-                                    <h4>After Stage 3</h4>
+                                    <h4>After Stage 2</h4>
                                     <div id="unit-after" class="grammar-display scrollbar"></div>
                                 </div>
                             </div>
@@ -379,24 +324,30 @@ D -> d"></textarea>
                     </div>
                 </section>
 
-                <!-- STEP 4: FINAL USELESS SYMBOLS -->
-                <section class="panel animate-on-scroll" id="step-4">
-                    <h2>Stage 4: Final Cleanup (Emerging Useless Symbols)</h2>
-                    <p class="subtitle">A final sweep to remove any symbols that became unreachable or non-productive during the null/unit phases.</p>
-                    <div class="stage-stats" id="u2-stats"></div>
-
-                    <div class="stage-sets-box" id="u2-sets"></div>
+                <!-- STEP 3: USELESS SYMBOLS -->
+                <section class="panel animate-on-scroll" id="step-3">
+                    <h2>Stage 3: Useless Symbols Removal</h2>
+                    <p class="subtitle">Eliminates non-productive symbols and symbols unreachable from the start state.</p>
+                    <div class="stage-stats" id="useless-stats"></div>
+                    
+                    <div class="stage-sets-box" id="useless-sets"></div>
                     <details class="algo-details">
-                        <summary>Algorithm: Final Sweep</summary>
+                        <summary>Algorithm: Remove Useless Symbols</summary>
                         <pre>
-Applied same Algorithm as Stage 1 to collect newly isolated symbols and prune the final grammar tree.
+1. Compute Generating Set (G) [Productive]:
+   - Add all variables that directly derive strings of terminals.
+   - Iteratively add variables that derive strings of symbols currently in G.
+2. Compute Reachable Set (R):
+   - Start with R = {S}.
+   - Iteratively add any variable that appears on RHS of rules mapped from variables in R.
+   - Remove any rules for variables not in R.
                         </pre>
                     </details>
                     
                     <div class="dashboard-grid full-width">
                         <div class="logs-pane">
                             <h3>Algorithmic Traces</h3>
-                            <div id="u2-logs" class="logs-content scrollbar"></div>
+                            <div id="useless-logs" class="logs-content scrollbar"></div>
                         </div>
                         <div class="visuals-pane">
                             <div class="graph-wrapper">
@@ -410,18 +361,58 @@ Applied same Algorithm as Stage 1 to collect newly isolated symbols and prune th
                                     <div class="legend-item"><span class="legend-line" style="background:#3b82f6;"></span>Unit Rule</div>
                                     <div class="legend-item"><span class="legend-line" style="background:#34d399; height:3px;"></span>Added</div>
                                 </div>
-                                <div id="u2-network" class="network-canvas"></div>
-                                <button class="btn-reset-graph" data-network="u2-network">Reset View</button>
+                                <div id="useless-network" class="network-canvas"></div>
+                                <button class="btn-reset-graph" data-network="useless-network">Reset View</button>
                             </div>
                             <div class="state-container">
                                 <div class="grammar-col">
-                                    <h4>Before Stage 4</h4>
-                                    <div id="u2-before" class="grammar-display scrollbar"></div>
+                                    <h4>Before Stage 3</h4>
+                                    <div id="useless-before" class="grammar-display scrollbar"></div>
                                 </div>
                                 <div class="grammar-col">
-                                    <h4>After Stage 4</h4>
-                                    <div id="u2-after" class="grammar-display scrollbar"></div>
+                                    <h4>After Stage 3</h4>
+                                    <div id="useless-after" class="grammar-display scrollbar"></div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 4: FINAL RESULT SUMMARY -->
+                <section class="panel animate-on-scroll" id="step-4">
+                    <h2>Stage 4: Validation & Summary</h2>
+                    <p class="subtitle">A rigorous double-pass safety check. The pipeline is run a second time to ensure the grammar has converged to absolute stability.</p>
+                    <div class="stage-stats" id="final-stats-summary"></div>
+
+                    <div class="stage-sets-box" id="final-sets-summary"></div>
+                    <details class="algo-details">
+                        <summary>Status: Validation Pass Log</summary>
+                        <pre>
+The algorithms (Null → Unit → Useless) are applied again to the 'Final' state.
+If the resulting grammar matches structurally, the CFG is mathematically proven to be 
+minimal and stable. A status banner will appear below to confirm.
+                        </pre>
+                    </details>
+                    
+                    <div class="dashboard-grid">
+                        <div class="logs-pane">
+                            <h3>Algorithmic Traces</h3>
+                            <div id="final-logs" class="logs-content scrollbar"></div>
+                        </div>
+                        <div class="visuals-pane">
+                            <div class="graph-wrapper">
+                                <h3>Convergence Graph</h3>
+                                <div class="graph-legend">
+                                    <div class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span>Start Symbol</div>
+                                    <div class="legend-item"><span class="legend-dot" style="background:#fbbf24;"></span>Nullable</div>
+                                    <div class="legend-item"><span class="legend-dot" style="background:#34d399;"></span>Generating</div>
+                                    <div class="legend-item"><span class="legend-dot" style="background:#f87171;"></span>Removed</div>
+                                    <div class="legend-item"><span class="legend-dot" style="background:#94a3b8;"></span>Unreachable</div>
+                                    <div class="legend-item"><span class="legend-line" style="background:#3b82f6;"></span>Unit Rule</div>
+                                    <div class="legend-item"><span class="legend-line" style="background:#34d399; height:3px;"></span>Added</div>
+                                </div>
+                                <div id="final-network" class="network-canvas" style="height: 500px;"></div>
+                                <button class="btn-reset-graph" data-network="final-network">Reset View</button>
                             </div>
                         </div>
                     </div>

@@ -471,16 +471,16 @@ select.builder-input { border-right: 12px solid transparent; cursor: pointer; co
 }
 
 /* Grammar Display Rules (Diffs) */
-.grammar-rule { display: flex; margin-bottom: 6px; padding: 6px 10px; background: #0a0a0a; border-radius: 4px; align-items: center; font-size: 1.05rem; border-left: 2px solid transparent; }
+.grammar-rule { display: flex; flex-wrap: wrap; margin-bottom: 8px; padding: 6px 10px; background: #0a0a0a; border-radius: 4px; align-items: start; font-size: 1rem; border-left: 2px solid #222; }
 
-.token-removed { color: var(--danger); background: rgba(239, 68, 68, 0.15); padding: 2px 6px; border-radius: 4px; }
-.token-added { color: var(--success); background: rgba(16, 185, 129, 0.15); padding: 2px 6px; border-radius: 4px; }
+.token-removed { color: #f87171; font-weight: 500; text-decoration: line-through; opacity: 0.8; }
+.token-added { color: #34d399; font-weight: 600; padding: 0 4px; border-bottom: 1px solid rgba(52, 211, 153, 0.3); }
 .token-kept { color: #e2e8f0; }
-.pipe { color: #444; margin: 0 4px;}
+.pipe { color: #333; margin: 0 8px; font-weight: 300; }
 
-.rule-lhs { color: #fff; font-weight: 500; width: 30px; text-align: right; margin-right: 15px; }
-.rule-arrow { color: #555; margin-right: 15px; }
-.rule-rhs { color: #e2e8f0; letter-spacing: 1px; }
+.rule-lhs { color: #fff; font-weight: 600; width: 35px; text-align: right; margin-right: 15px; font-family: 'Fira Code', monospace; padding-top: 2px; }
+.rule-arrow { color: #555; margin-right: 15px; padding-top: 2px; }
+.rule-rhs { color: #e2e8f0; line-height: 1.6; flex: 1; }
 
 /* Final Compare */
 .final-compare-grid { display: flex; gap: 20px; align-items: stretch; margin: 2rem 0; }

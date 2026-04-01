@@ -29,7 +29,9 @@ function _calculate_metrics(grammar) {
 // -----------------------------------------
 function remove_null_productions(grammar) {
     const step_logs = [];
-    const nullable = _find_nullable(grammar);
+    const workingGrammar = JSON.parse(JSON.stringify(grammar));
+    const nullable = _find_nullable(workingGrammar);
+    
     step_logs.push({
         title: "Find Nullable Non-Terminals",
         description: "A non-terminal is nullable if it can derive ε (empty string). We iteratively find all nullable symbols.",
@@ -40,58 +42,47 @@ function remove_null_productions(grammar) {
     if (nullable.size === 0) {
         return { 
             stageName: "Null Productions Removal",
-            grammar, 
+            grammar: workingGrammar, 
             step_logs, 
             stage_sets: { nullable: [] },
-            metrics: _calculate_metrics(grammar)
+            metrics: _calculate_metrics(workingGrammar)
         };
     }
 
-    const new_productions = {};
+    const updatedGrammar = {};
     const rule_transformations = [];
 
-    for (const [non_terminal, productions] of Object.entries(grammar)) {
-        new_productions[non_terminal] = new Set();
-        
+    // Initialize updatedGrammar with keys from workingGrammar
+    for (const nt in workingGrammar) updatedGrammar[nt] = new Set();
+
+    for (const [non_terminal, productions] of Object.entries(workingGrammar)) {
         for (const production of productions) {
-            if (production === '') continue; // Skip epsilon for now
+            if (production === '') continue; // Skip epsilon
             
             const original_rule = `${non_terminal} → ${production}`;
             const generated_rules = [];
             
-            // Always keep original
-            new_productions[non_terminal].add(production);
-            generated_rules.push({
-                rule: original_rule,
-                reason: "Original rule (kept)",
-                type: "original"
-            });
+            // Keep original
+            updatedGrammar[non_terminal].add(production);
+            generated_rules.push({ rule: original_rule, reason: "Original rule (kept)", type: "original" });
             
             const nullable_positions = [];
             for (let i = 0; i < production.length; i++) {
                 if (nullable.has(production[i])) nullable_positions.push(i);
             }
             
-            if (nullable_positions.length === 0) {
-                rule_transformations.push({
-                    original_rule: original_rule,
-                    generated_rules: generated_rules
-                });
-                continue;
-            }
-            
-            for (let r = 1; r <= nullable_positions.length; r++) {
-                const combos = getCombinations(nullable_positions, r);
-                for (const combo of combos) {
-                    let new_prod = '';
-                    for (let i = 0; i < production.length; i++) {
-                        if (!combo.includes(i)) new_prod += production[i];
-                    }
-                    if (new_prod) {
-                        new_productions[non_terminal].add(new_prod);
+            if (nullable_positions.length > 0) {
+                for (let r = 1; r <= nullable_positions.length; r++) {
+                    const combos = getCombinations(nullable_positions, r);
+                    for (const combo of combos) {
+                        let new_prod = '';
+                        for (let i = 0; i < production.length; i++) {
+                            if (!combo.includes(i)) new_prod += production[i];
+                        }
+                        updatedGrammar[non_terminal].add(new_prod);
                         const removed_symbols = combo.map(i => production[i]);
                         generated_rules.push({
-                            rule: `${non_terminal} → ${new_prod}`,
+                            rule: `${non_terminal} → ${new_prod || 'ε'}`,
                             reason: `Removed nullable symbol(s): ${removed_symbols.join(', ')}`,
                             type: "generated"
                         });
@@ -99,11 +90,13 @@ function remove_null_productions(grammar) {
                 }
             }
             
-            rule_transformations.push({
-                original_rule: original_rule,
-                generated_rules: generated_rules
-            });
+            rule_transformations.push({ original_rule: original_rule, generated_rules: generated_rules });
         }
+    }
+
+    const finalGrammar = {};
+    for (const nt in updatedGrammar) {
+        finalGrammar[nt] = Array.from(updatedGrammar[nt]).filter(p => p !== '');
     }
 
     step_logs.push({
@@ -113,14 +106,6 @@ function remove_null_productions(grammar) {
         type: "production_generation"
     });
 
-    for (const non_terminal in grammar) {
-        grammar[non_terminal] = Array.from(new_productions[non_terminal]);
-    }
-
-    for (const non_terminal in grammar) {
-        grammar[non_terminal] = grammar[non_terminal].filter(prod => prod !== '');
-    }
-
     step_logs.push({
         title: "Remove Null Productions",
         description: "All ε productions are completely removed from the grammar.",
@@ -129,10 +114,10 @@ function remove_null_productions(grammar) {
 
     return { 
         stageName: "Null Productions Removal",
-        grammar, 
+        grammar: finalGrammar, 
         step_logs, 
         stage_sets: { nullable: Array.from(nullable) },
-        metrics: _calculate_metrics(grammar)
+        metrics: _calculate_metrics(finalGrammar)
     };
 }
 
@@ -186,7 +171,9 @@ function _find_nullable(grammar) {
 // -----------------------------------------
 function remove_unit_productions(grammar) {
     const step_logs = [];
-    const unit_prods = _find_unit_productions(grammar);
+    const workingGrammar = JSON.parse(JSON.stringify(grammar));
+    const unit_prods = _find_unit_productions(workingGrammar);
+    
     step_logs.push({
         title: "Identify Unit Productions",
         description: "A unit production is of the form A -> B where A and B are non-terminals.",
@@ -197,15 +184,15 @@ function remove_unit_productions(grammar) {
     if (Object.keys(unit_prods).length === 0) {
         return { 
             stageName: "Unit Productions Removal",
-            grammar, 
+            grammar: workingGrammar, 
             step_logs, 
             stage_sets: { closures: {} },
-            metrics: _calculate_metrics(grammar)
+            metrics: _calculate_metrics(workingGrammar)
         };
     }
 
-    const graph = _build_unit_graph(grammar, unit_prods);
-    const closure = _find_closure(graph, grammar);
+    const graph = _build_unit_graph(workingGrammar, unit_prods);
+    const closure = _find_closure(graph, workingGrammar);
     
     const closureArrayFormat = {};
     for (let k in closure) closureArrayFormat[k] = Array.from(closure[k]);
@@ -217,44 +204,37 @@ function remove_unit_productions(grammar) {
         type: "closure_calculation"
     });
 
-    const original_grammar = JSON.parse(JSON.stringify(grammar));
+    const updatedGrammar = {};
     const rule_transformations = [];
 
-    for (const non_terminal in grammar) {
-        const non_unit_prods = original_grammar[non_terminal].filter(prod => !_is_unit_production(prod));
-        const unit_prod_list = original_grammar[non_terminal].filter(prod => _is_unit_production(prod));
-        
-        const new_prods = new Set(non_unit_prods);
+    for (const non_terminal in workingGrammar) {
+        const current_new_prods = new Set();
         const transformation = {
             non_terminal: non_terminal,
-            removed_units: [],
+            removed_units: workingGrammar[non_terminal].filter(p => _is_unit_production(p)).map(p => `${non_terminal} → ${p}`),
             added_productions: []
         };
         
-        for (const unit_prod of unit_prod_list) {
-            transformation.removed_units.push(`${non_terminal} → ${unit_prod}`);
-            const reachable_nt = unit_prod;
-            
-            for (const target_nt of closure[non_terminal]) {
-                if (original_grammar[target_nt]) {
-                    for (const prod of original_grammar[target_nt]) {
-                        if (!_is_unit_production(prod)) {
-                            new_prods.add(prod);
-                            const rsClosure = closure[reachable_nt] || new Set();
-                            if (target_nt === reachable_nt || rsClosure.has(target_nt)) {
-                                transformation.added_productions.push({
-                                    rule: `${non_terminal} → ${prod}`,
-                                    derived_from: `${target_nt} → ${prod}`,
-                                    via_unit: `${non_terminal} → ${unit_prod} → ... → ${target_nt}`
-                                });
-                            }
+        // Fix: Use full closure directly as requested.
+        // For each variable nt2 in closure[non_terminal], add nt2's non-unit productions to non_terminal.
+        for (const nt2 of closure[non_terminal]) {
+            if (workingGrammar[nt2]) {
+                for (const prod of workingGrammar[nt2]) {
+                    if (!_is_unit_production(prod)) {
+                        if (!current_new_prods.has(prod)) {
+                            current_new_prods.add(prod);
+                            transformation.added_productions.push({
+                                rule: `${non_terminal} → ${prod}`,
+                                derived_from: `${nt2} → ${prod}`,
+                                via_unit: `${non_terminal} → ... → ${nt2}`
+                            });
                         }
                     }
                 }
             }
         }
         
-        grammar[non_terminal] = Array.from(new_prods);
+        updatedGrammar[non_terminal] = Array.from(current_new_prods);
         if (transformation.removed_units.length > 0) {
             rule_transformations.push(transformation);
         }
@@ -269,10 +249,10 @@ function remove_unit_productions(grammar) {
 
     return { 
         stageName: "Unit Productions Removal",
-        grammar, 
+        grammar: updatedGrammar, 
         step_logs,
         stage_sets: { closures: closureArrayFormat },
-        metrics: _calculate_metrics(grammar)
+        metrics: _calculate_metrics(updatedGrammar)
     };
 }
 
@@ -339,21 +319,26 @@ function _find_closure(graph, grammar) {
 // -----------------------------------------
 function remove_useless_symbols(grammar, stageTitle = "Useless Symbols Removal") {
     const step_logs = [];
-    const p1 = _phase1_remove_nonproductive(grammar);
-    step_logs.push(p1);
     
-    const p2 = _phase2_remove_unreachable(grammar);
-    step_logs.push(p2);
+    // Phase 1: Productive symbols
+    const g1 = JSON.parse(JSON.stringify(grammar));
+    const { log: log1, grammar: productiveGrammar } = _phase1_remove_nonproductive(g1);
+    step_logs.push(log1);
+    
+    // Phase 2: Reachable symbols (operating on a clean clone of the productive grammar)
+    const g2 = JSON.parse(JSON.stringify(productiveGrammar));
+    const { log: log2, grammar: finalGrammar } = _phase2_remove_unreachable(g2);
+    step_logs.push(log2);
     
     return { 
         stageName: stageTitle,
-        grammar, 
+        grammar: finalGrammar, 
         step_logs,
         stage_sets: {
-            generating: p1.productive_symbols,
-            reachable: p2.reachable_symbols
+            generating: log1.productive_symbols,
+            reachable: log2.reachable_symbols
         },
-        metrics: _calculate_metrics(grammar)
+        metrics: _calculate_metrics(finalGrammar)
     };
 }
 
@@ -383,14 +368,20 @@ function _phase1_remove_nonproductive(grammar) {
     const all_nts = Object.keys(grammar);
     const non_productive = new Set(all_nts.filter(x => !productive.has(x)));
     
+    const filteredGrammar = {};
     for (const non_terminal in grammar) {
+        if (!productive.has(non_terminal)) {
+            // Already added to removal logs below
+            continue;
+        }
+
         const remaining_prods = grammar[non_terminal].filter(prod => {
             for (const sym of prod) {
                 if (isUpper(sym) && non_productive.has(sym)) return false;
             }
             return true;
         });
-        
+
         const removed_prods = grammar[non_terminal].filter(prod => {
             for (const sym of prod) {
                 if (isUpper(sym) && non_productive.has(sym)) return true;
@@ -411,32 +402,51 @@ function _phase1_remove_nonproductive(grammar) {
             });
         }
         
-        grammar[non_terminal] = remaining_prods;
+        filteredGrammar[non_terminal] = remaining_prods;
     }
-    
+
+    // Explicitly document removed symbols that don't even have partially productive rules
     for (const sym of non_productive) {
-        if (grammar[sym]) delete grammar[sym];
+        if (grammar[sym]) {
+            for (const prod of grammar[sym]) {
+                const alreadyLogged = rule_removals.some(r => r.original_rule === `${sym} → ${prod}`);
+                if (!alreadyLogged) {
+                    rule_removals.push({
+                        original_rule: `${sym} → ${prod}`,
+                        reason: `Symbol '${sym}' is not productive.`,
+                        removed_symbols: [sym],
+                        type: "non_productive"
+                    });
+                }
+            }
+        }
     }
     
     return {
-        title: "Phase 1: Remove Non-Productive Symbols",
-        description: "A symbol is productive if it can derive a terminal string or ε. We iteratively find productive symbols and remove non-productive ones.",
-        productive_symbols: Array.from(productive),
-        removed_symbols: Array.from(non_productive),
-        removed_rules: rule_removals,
-        type: "phase1"
+        log: {
+            title: "Phase 1: Remove Non-Productive Symbols",
+            description: "A symbol is productive if it can derive a terminal string or ε. We iteratively find productive symbols and remove non-productive ones.",
+            productive_symbols: Array.from(productive),
+            removed_symbols: Array.from(non_productive),
+            removed_rules: rule_removals,
+            type: "phase1"
+        },
+        grammar: filteredGrammar
     };
 }
 
 function _phase2_remove_unreachable(grammar) {
     if (!grammar || !grammar['S']) {
         return {
-            title: "Phase 2: Remove Non-Reachable Symbols",
-            description: "Start symbol 'S' not found. No symbols to check for reachability.",
-            reachable_symbols: [],
-            removed_symbols: [],
-            removed_rules: [],
-            type: "phase2"
+            log: {
+                title: "Phase 2: Remove Non-Reachable Symbols",
+                description: "Start symbol 'S' not found. No symbols to check for reachability.",
+                reachable_symbols: [],
+                removed_symbols: [],
+                removed_rules: [],
+                type: "phase2"
+            },
+            grammar: {}
         };
     }
     
@@ -461,6 +471,13 @@ function _phase2_remove_unreachable(grammar) {
     
     const non_reachable = new Set(Object.keys(grammar).filter(sym => !reachable.has(sym)));
     
+    const filteredGrammar = {};
+    for (const sym of reachable) {
+        if (grammar[sym]) {
+            filteredGrammar[sym] = grammar[sym];
+        }
+    }
+
     for (const sym of non_reachable) {
         if (grammar[sym]) {
             for (const prod of grammar[sym]) {
@@ -471,17 +488,19 @@ function _phase2_remove_unreachable(grammar) {
                     type: "non_reachable"
                 });
             }
-            delete grammar[sym];
         }
     }
     
     return {
-        title: "Phase 2: Remove Non-Reachable Symbols",
-        description: "Starting from S, we find all symbols reachable through derivations. Symbols not reachable from S are removed.",
-        reachable_symbols: Array.from(reachable),
-        removed_symbols: Array.from(non_reachable),
-        removed_rules: rule_removals,
-        type: "phase2"
+        log: {
+            title: "Phase 2: Remove Non-Reachable Symbols",
+            description: "Starting from S, we find all symbols reachable through derivations. Symbols not reachable from S are removed.",
+            reachable_symbols: Array.from(reachable),
+            removed_symbols: Array.from(non_reachable),
+            removed_rules: rule_removals,
+            type: "phase2"
+        },
+        grammar: filteredGrammar
     };
 }
 

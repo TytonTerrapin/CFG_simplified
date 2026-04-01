@@ -1,107 +1,57 @@
 # CFG Simplified 
 
-**CFG Simplified** is a high-fidelity, interactive web application designed to demonstrate and perform the formal simplification of **Context-Free Grammars (CFGs)**. It bridges the gap between theoretical computer science and practical tooling by providing a real-time, state-first execution trace of the transformation pipeline.
-
-## Table of Contents
-1. [Key Capabilities](#key-capabilities)
-2. [The Simplification Pipeline](#the-simplification-pipeline)
-3. [Modern UI & UX](#modern-ui--ux)
-4. [Grammar Syntax](#grammar-syntax)
-5. [Tech Stack](#tech-stack)
-6. [Getting Started](#getting-started)
-7. [Architecture](#architecture)
-8. [License](#license)
+**CFG Simplified** is a high-fidelity, interactive platform for the formal simplification of **Context-Free Grammars (CFGs)**. It bridges the gap between theoretical computer science and practical tooling by providing a real-time, state-first execution trace of the transformation pipeline.
 
 ## Key Capabilities
 
-- **State-First Architecture**: Decouples algorithmic logic from rendering, maintaining a complete execution history of the grammar's evolution.
-- **Strict Algorithmic Precision**: Implements the standard four-stage simplification pipeline used in formal language theory.
-- **Real-Time Pipeline Tracing**: Observes the grammar's evolution through detailed, JSON-driven logs and state-by-state comparisons.
-- **High-Fidelity Dependency Graphs**: Visualizes symbol relationships and rule dependencies using a dynamic physics-based network with per-stage state captures.
-- **Professional PDF Reporting**: Generates data-driven, print-optimized documents using `jsPDF` and `AutoTable`, including embedded graph states.
+- **Immutable Transformation Pipeline**: Decouples algorithmic logic from rendering by capturing independent grammar states at every stage, ensuring a reliable and traceable evolution.
+- **Strict Algorithmic Precision**: Operates on the standard mathematical sequence (Null → Unit → Useless) required for formal grammar equivalence.
+- **Interactive Execution Traces**: Provides deep visibility into the transformation process through detailed algorithmic logs and state-by-state comparisons.
+- **Dynamic Dependency Visualization**: Maps symbol relationships and rule dependencies using a physics-based network tailored to each pipeline stage.
+- **Automated Validation**: Features a proactive convergence engine that mathematically verifies the stability of the final output.
+- **Data-Driven Reporting**: Generates comprehensive PDF reports including embedded graphs, metrics, and complete execution histories.
 
 ## The Simplification Pipeline
 
-The tool follows a rigorous sequence to ensure the resulting grammar is strictly minimized while remaining equivalent to the original.
+The platform follows a rigorous sequence to ensure grammars are strictly minimized while remaining equivalent to the original source.
 
-### 1. Initial Useless Symbols Sweep
-Removes symbols that contribute nothing to the language generation:
-- **Phase 1: Non-Productive Symbols**: Identifies variables that cannot derive a string of terminals via fixed-point iteration.
-- **Phase 2: Unreachable Symbols**: Performs a graph traversal from the start symbol $S$ to prune disconnected components.
+### 1. Null Productions Removal
+Eliminates $\epsilon$-productions ($A \to \epsilon$) while preserving language integrity through exhaustive power-set expansion. This stage identifies all nullable variables and generates the required alternative rules until epsilon-equivalence is achieved.
 
-### 2. Null Productions Removal
-Eliminates $\epsilon$-productions ($A \to \epsilon$) while preserving language equivalence:
-- **Nullable Detection**: Identifies variables that can derive the empty string.
-- **Production Expansion**: Generates all valid combinations of rules by substituting nullable occurrences with $\epsilon$.
+### 2. Unit Productions Removal
+Prunes redundant "alias" transitions (e.g., $A \to B$) by calculating the full mathematical derivation closure $\mathcal{D}(A)$ for every variable and substituting them with direct productions.
 
-### 3. Unit Productions Removal
-Prunes redundant "chains" (e.g., $A \to B$):
-- **Derivation Closure**: Calculates the set of non-terminals reachable from each variable through unit rules.
-- **Direct Substitution**: Collapses unit dependencies by mapping all non-unit rules of $B$ directly to $A$.
+### 3. Useless Symbols Pruning
+Deletes symbols that cannot contribute to terminal strings or are unreachable from the start symbol. A two-phase fixed-point sweep ensures that only productive and reachable symbols remain in the final grammar tree.
 
-### 4. Final Cleanup
-A secondary sweep using the **Useless Symbols** algorithm to catch any symbols that became isolated during the Null and Unit removal phases.
+### 4. Convergence Validation
+A definitive safety check that re-processes the final result through the entire pipeline to verify absolute structural stability. 
 
-## Modern UI & UX
+## UI & UX Design
 
-- **Floating Stage Navigator**: A persistent, glassmorphic sidebar allowing instant jumping between pipeline stages.
-- **Scroll Progress Bar**: Global position awareness with a sleek top-aligned progress indicator.
-- **IntersectionObserver Animations**: Sections smoothly slide and fade into view as you navigate the execution trace.
-- **Technical Blueprint Aesthetic**: A dark-mode, cyberpunk-inspired design with emerald highlights and glassmorphic blurs.
+- **High-Legibility Differential Views**: Employs colored text indicators and semantic highlighting to visualize additions and removals clearly, even in large rule sets.
+- **Floating Stage Navigator**: A persistent navigation system that allows instant jumping between transformation states.
+- **Scientific Blueprint Aesthetic**: A professional dark-mode interface designed for educational clarity and technical exploration.
+- **Real-Time Statistical Tracking**: Monitors rule count, variable density, and terminal distribution across every step of the process.
 
 ## Grammar Syntax
 
-The editor supports standard notation for CFG rules:
-- **Arrow Notation**: Use `->`, `=>`, or `::=` to separate LHS and RHS.
-- **OR Operator**: Use `|` to specify multiple alternatives.
-- **Null Symbols**: Use `?`, `''`, or `ε` to represent the empty string.
-- **Variables**: Uppercase letters (e.g., `S, A, B`).
-- **Terminals**: Lowercase letters, numbers, or symbols.
-
-**Example Input:**
-```text
-S -> AB | aC
-A -> b | ?
-B -> b | S
-C -> D | ?
-D -> d
-```
+The system supports standard notation for context-free rules:
+- **Arrow Notation**: Supports `->`, `=>`, and `::=` operators.
+- **Alternative Operator**: Supports `|` and `/` for rule branching.
+- **Empty Productions**: Supports `?`, `''`, and `ε` for the empty string.
+- **Variable/Terminal Case**: Standard uppercase for variables and lowercase for terminals.
 
 ## Tech Stack
 
-- **HTML5/CSS3**: Semantic structure with **Glassmorphism** and CSS custom properties.
-- **Vanilla JavaScript**: Pure ES6 modules for core logic and UI orchestration.
-- **vis-network**: Real-time force-directed graph rendering.
-- **jsPDF & AutoTable**: Professional programmatic PDF generation from JSON states.
-- **Fonts**: Outfit (UI), Fira Code (Monospace).
-
-## Getting Started
-
-### Running Locally
-
-Since this is a static project using ES modules, you must serve it via a local web server:
-
-**Option 1: Node.js (Recommended)**
-```bash
-npx serve .
-```
-
-**Option 2: Python**
-```bash
-python -m http.server 8000
-```
+- **Engine**: Pure ES6+ JavaScript modules.
+- **Styling**: Specialized CSS3 with glassmorphic depth and custom properties.
+- **Visualization**: Force-directed graph rendering via `vis-network`.
+- **Reporting**: Programmatic document generation via `jsPDF` and `AutoTable`.
 
 ## Architecture
 
-### Logic Engine (`logic.js`)
-The logic engine is now state-driven, returning standardized `StageRecord` objects. This allows for:
-- **Metrics Calculation**: Automated complexity tracking across every transformation.
-- **Algorithmic Justification**: Detailed logs of why specific rules were added or removed.
-
-### UI Controller (`app.js`)
-- **Pipeline History**: Maintains a `pipelineHistory` array as the single source of truth for the entire run.
-- **State Capture**: Captures `vis-network` canvas states as PNGs for the PDF reporting system.
-- **Responsive Navigation**: Synchronizes the Stage Navigator with scroll position using `IntersectionObserver`.
+CFG Simplified is built on a **Functional-State Architecture**. The core logic, contained in `logic.js`, is designed to be purely deterministic, returning standardized trace records. The UI layer in `app.js` manages a persistent history of these records as the single source of truth, enabling advanced features like multi-stage graph morphing and cross-stage PDF generation.
 
 ## License
-Distributed under the **MIT License**. Created for high-fidelity educational exploration of Formal Language Theory.
+Distributed under the **MIT License**. Crafted for high-fidelity exploration of formal language theory.

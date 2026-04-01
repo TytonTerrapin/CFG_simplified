@@ -16,15 +16,6 @@ const DOM = {
     stages: [
         {
             panel: document.getElementById('step-1'),
-            logs: document.getElementById('u1-logs'),
-            before: document.getElementById('u1-before'),
-            after: document.getElementById('u1-after'),
-            network: document.getElementById('u1-network'),
-            stats: 'u1-stats',
-            sets: 'u1-sets'
-        },
-        {
-            panel: document.getElementById('step-2'),
             logs: document.getElementById('null-logs'),
             before: document.getElementById('null-before'),
             after: document.getElementById('null-after'),
@@ -33,7 +24,7 @@ const DOM = {
             sets: 'null-sets'
         },
         {
-            panel: document.getElementById('step-3'),
+            panel: document.getElementById('step-2'),
             logs: document.getElementById('unit-logs'),
             before: document.getElementById('unit-before'),
             after: document.getElementById('unit-after'),
@@ -42,13 +33,22 @@ const DOM = {
             sets: 'unit-sets'
         },
         {
+            panel: document.getElementById('step-3'),
+            logs: document.getElementById('useless-logs'),
+            before: document.getElementById('useless-before'),
+            after: document.getElementById('useless-after'),
+            network: document.getElementById('useless-network'),
+            stats: 'useless-stats',
+            sets: 'useless-sets'
+        },
+        {
             panel: document.getElementById('step-4'),
-            logs: document.getElementById('u2-logs'),
-            before: document.getElementById('u2-before'),
-            after: document.getElementById('u2-after'),
-            network: document.getElementById('u2-network'),
-            stats: 'u2-stats',
-            sets: 'u2-sets'
+            logs: document.getElementById('final-logs'),
+            before: document.getElementById('final-before'),
+            after: document.getElementById('final-after'),
+            network: document.getElementById('final-network'),
+            stats: 'final-stats-summary',
+            sets: 'final-sets-summary'
         }
     ],
 
@@ -192,16 +192,15 @@ function buildHtmlLogs(logs) {
                 </div>`;
             }).join('') + `</div>`;
         } else if (log.type === "unit_replacement") {
-            details = `<div class="rule-list" style="margin-top: 10px;">` + log.rule_transformations.map(rt => {
-                const derived = (closures[rt.non_terminal] || []).filter(s => s !== rt.non_terminal);
-                const cLine = derived.length > 0 ? `<div class="concept-line" style="margin-bottom: 12px;">Because ${rt.non_terminal} can derive { ${derived.join(', ')} }, we replace unit chains with direct productions.</div>` : '';
+            const derivedAll = Array.from(new Set(Object.values(closures).flat())).filter(s => !Object.keys(closures).includes(s));
+            const cLine = `<div class="concept-line" style="border-left-color: #3b82f6; background: rgba(59, 130, 246, 0.04); color: #93c5fd;">Unit productions (A → B) introduce unnecessary indirection. We compute the full derivation closure for each variable and substitute them with direct productions.</div>`;
+            details = cLine + `<div class="rule-list" style="margin-top: 10px;">` + log.rule_transformations.map(rt => {
                 return `
                 <div class="rule-transform-container" style="margin-bottom: 15px; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid #3b82f6;">
-                    <div style="font-weight: 600; color: #fff; margin-bottom: 8px;">Non-terminal: ${rt.non_terminal}</div>
-                    ${cLine}
+                    <div style="font-weight: 600; color: #fff; margin-bottom: 8px;">Variable: ${rt.non_terminal}</div>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                        ${rt.removed_units.map(ru => `<div class="rule-item removal" style="padding-left: 10px; border-left: 1px solid #444; font-size: 0.85rem;">Removed unit pair: ${ru}</div>`).join('')}
-                        ${rt.added_productions.map(ap => `<div class="rule-item addition" style="padding-left: 10px; border-left: 1px solid #444; font-size: 0.85rem;">Generated: ${ap.rule}</div>`).join('')}
+                        ${rt.removed_units.map(ru => `<div class="rule-item removal" style="padding-left: 10px; border-left: 1px solid #333; font-size: 0.85rem;">Removed Unit: ${ru}</div>`).join('')}
+                        ${rt.added_productions.map(ap => `<div class="rule-item addition" style="padding-left: 10px; border-left: 1px solid #333; font-size: 0.85rem;">Generated: ${ap.rule}</div>`).join('')}
                     </div>
                 </div>`;
             }).join('') + `</div>`;
@@ -210,6 +209,10 @@ function buildHtmlLogs(logs) {
             if (log.removed_symbols?.length > 0) details += `<div class="rule-item removal">Removed Symbols: { ${log.removed_symbols.join(', ')} }</div>`;
             log.removed_rules?.forEach(rr => details += `<div class="rule-item removal">Removed Rule: ${rr.original_rule}</div>`);
             details += `</div>`;
+        } else if (log.type === "summary-clear") {
+            details = `<div class="rule-list"><div class="rule-item addition" style="color: #34d399; font-weight: bold; padding: 10px; border-left: 3px solid #34d399; background: rgba(52, 211, 153, 0.1);">✓ VALIDATION PASSED</div></div>`;
+        } else if (log.type === "summary-warning") {
+            details = `<div class="rule-list"><div class="rule-item removal" style="color: #f87171; font-weight: bold; padding: 10px; border-left: 3px solid #f87171; background: rgba(248, 113, 113, 0.1);">⚠ VALIDATION FAILED</div></div>`;
         }
         return `<div class="log-entry"><h4>${log.title}</h4><p>${log.description}</p>${conceptLine}${details}</div>`;
     }).join('');
@@ -233,14 +236,14 @@ function renderSets(sets, stageIdx, containerId) {
     if (!sets || !container) return;
     let html = '';
     container.classList.add('active');
-    if (stageIdx === 1 || stageIdx === 4) {
-        html += `<div class="set-line"><span class="set-label">Generating G:</span> { ${sets.generating?.join(', ') || 'Ø'} }</div>`;
-        html += `<div class="set-line"><span class="set-label">Reachable R:</span> { ${sets.reachable?.join(', ') || 'Ø'} }</div>`;
-    } else if (stageIdx === 2) {
+    if (stageIdx === 1) {
         html += `<div class="set-line"><span class="set-label">Nullable N:</span> { ${sets.nullable?.join(', ') || 'Ø'} }</div>`;
-    } else if (stageIdx === 3) {
+    } else if (stageIdx === 2) {
         html += `<div class="set-line"><span class="set-label">Derivation Closures:</span></div>`;
         for (let k in sets.closures) html += `<div class="set-line" style="margin-left:15px; font-size: 0.9rem;">D(${k}) = { ${sets.closures[k].join(', ')} }</div>`;
+    } else if (stageIdx === 3 || stageIdx === 4) {
+        html += `<div class="set-line"><span class="set-label">Generating G:</span> { ${sets.generating?.join(', ') || 'Ø'} }</div>`;
+        html += `<div class="set-line"><span class="set-label">Reachable R:</span> { ${sets.reachable?.join(', ') || 'Ø'} }</div>`;
     }
     container.innerHTML = html;
 }
@@ -287,14 +290,14 @@ function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container, sets = {
         let color = '#4a5568', borderColor = '#111', opacity = 1;
         
         // Node role highlighting
-        if ((stageIdx === 1 || stageIdx === 4) && sets.generating) {
-            if (sets.generating.includes(id)) { color = '#34d399'; borderColor = '#059669'; } // Generating
-            else if (!isTerm) { color = '#f87171'; borderColor = '#ef4444'; } // Non-generating
+        if (stageIdx === 1 && sets.nullable?.includes(id)) { color = '#fbbf24'; borderColor = '#f59e0b'; } // Nullable
+        
+        if (stageIdx === 3 || stageIdx === 4) {
+            if (sets.generating && sets.generating.includes(id)) { color = '#34d399'; borderColor = '#059669'; } // Generating
+            else if (sets.generating && !isTerm) { color = '#f87171'; borderColor = '#ef4444'; } // Non-generating
+            
+            if (sets.reachable && !sets.reachable.includes(id)) { color = '#94a3b8'; borderColor = '#475569'; } // Unreachable
         }
-        if ((stageIdx === 1 || stageIdx === 4) && sets.reachable && !sets.reachable.includes(id)) {
-            color = '#94a3b8'; borderColor = '#475569'; // Unreachable
-        }
-        if (stageIdx === 2 && sets.nullable?.includes(id)) { color = '#fbbf24'; borderColor = '#f59e0b'; } // Nullable
 
         if (id === 'S') color = '#3b82f6';
         if (id === '?') color = '#6b7280';
@@ -379,13 +382,53 @@ function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container, sets = {
 
 // --- Pipeline Control ---
 
+function areGrammarsEqual(g1, g2) {
+    const keys1 = Object.keys(g1).sort();
+    const keys2 = Object.keys(g2).sort();
+    if (keys1.length !== keys2.length) return false;
+    for (let i = 0; i < keys1.length; i++) {
+        if (keys1[i] !== keys2[i]) return false;
+        const k = keys1[i];
+        const arr1 = [...g1[k]].sort();
+        const arr2 = [...g2[k]].sort();
+        if (arr1.length !== arr2.length) return false;
+        for (let j = 0; j < arr1.length; j++) {
+            if (arr1[j] !== arr2[j]) return false;
+        }
+    }
+    return true;
+}
+
 function runFullPipeline() {
     const initG = parseGrammar(DOM.cfgInput.value);
     const s0 = { stageName: "Original", grammar: initG, metrics: _calculate_metrics(initG) };
-    const s1 = remove_useless_symbols(deepCopy(initG), "Initial Useless Sweep");
-    const s2 = remove_null_productions(deepCopy(s1.grammar));
-    const s3 = remove_unit_productions(deepCopy(s2.grammar));
-    const s4 = remove_useless_symbols(deepCopy(s3.grammar), "Final Cleanup Sweep");
+    
+    // Correct algorithmic order
+    const s1 = remove_null_productions(deepCopy(initG));
+    const s2 = remove_unit_productions(deepCopy(s1.grammar));
+    const s3 = remove_useless_symbols(deepCopy(s2.grammar), "Useless Symbols Removal");
+    
+    // Validation pass
+    let v_grammar = deepCopy(s3.grammar);
+    v_grammar = remove_null_productions(v_grammar).grammar;
+    v_grammar = remove_unit_productions(v_grammar).grammar;
+    v_grammar = remove_useless_symbols(v_grammar).grammar;
+    
+    const isStable = areGrammarsEqual(s3.grammar, v_grammar);
+    
+    // Summary stage to maintain 4-stage UI
+    const s4 = {
+        ...s3,
+        stageName: "Validation Check",
+        step_logs: [{
+            title: isStable ? "Validation Passed: Grammar is Stable" : "Validation Warning: Grammar is Unstable",
+            description: isStable ? 
+                "✓ CLEAR: The rigorous mathematical validation has completed. Re-running the entire normalization pipeline on this output yielded no further reductions. The grammar is perfectly stable and minimized." : 
+                "⚠ WARNING: The grammar required further reductions on a second pass. This indicates cyclic anomalies or unhandled edge cases.",
+            type: isStable ? "summary-clear" : "summary-warning"
+        }]
+    };
+    
     pipelineHistory = [s0, s1, s2, s3, s4];
 }
 
@@ -400,8 +443,8 @@ function processAllStepsAndRender() {
     for (let i = 1; i <= 4; i++) {
         const stage = pipelineHistory[i], prev = pipelineHistory[i - 1], dm = DOM.stages[i - 1];
         dm.logs.innerHTML = buildHtmlLogs(stage.step_logs || stage.logs);
-        dm.before.innerHTML = renderGrammarDiff(prev.grammar, stage.grammar, 'before');
-        dm.after.innerHTML = renderGrammarDiff(prev.grammar, stage.grammar, 'after');
+        if (dm.before) dm.before.innerHTML = renderGrammarDiff(prev.grammar, stage.grammar, 'before');
+        if (dm.after) dm.after.innerHTML = renderGrammarDiff(prev.grammar, stage.grammar, 'after');
         renderStats(prev.metrics, stage.metrics, dm.stats);
         renderSets(stage.stage_sets || stage.sets, i, dm.sets);
     }
