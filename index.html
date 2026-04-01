@@ -443,40 +443,38 @@ minimal and stable. A status banner will appear below to confirm.
                         <span class="icon-success">✔</span>
                         <p>The strictly minimized, equivalent CFG is ready. Compare your original input with the final optimized grammar.</p>
                     </div>
-                    <div class="stage-stats" id="final-stats" style="justify-content: center; margin-bottom: 2rem;"></div>
-                    
-                    <div class="final-compare-grid">
-                        <div class="grammar-box">
-                            <h3>Original Grammar</h3>
-                            <div id="final-original" class="grammar-display scrollbar"></div>
+                    <div class="dynamic-playback-container" style="background: var(--panel-bg); border: 1px solid #333; border-radius: 12px; padding: 2rem; margin-top: 1rem; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                        <div class="playback-header" style="display: flex; flex-direction: column; align-items: center; gap: 1.5rem; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px dashed #333;">
+                            <div class="playback-controls" style="display: flex; gap: 1rem; align-items: center; justify-content: center; width: 100%;">
+                                <button id="btn-prev-graph" class="btn btn-secondary">◀ Prev</button>
+                                <div style="flex:1; text-align: center;">
+                                    <h3 id="graph-stage-label" style="margin: 0; font-size: 1.5rem; color: #fff;">Stage 0: Original Grammar</h3>
+                                </div>
+                                <button id="btn-auto-play" class="btn btn-primary" style="width: 140px; background: #6366f1; border-color: #4f46e5;">▶ Auto-Play</button>
+                                <button id="btn-next-graph" class="btn btn-secondary">Next ▶</button>
+                            </div>
+                            
+                            <!-- Dynamic stats morph here -->
+                            <div class="stage-stats" id="dynamic-stats" style="justify-content: center; margin: 0; width: 100%;"></div>
                         </div>
-                        <div class="arrow-container">
-                            <span class="transform-arrow">➔</span>
-                        </div>
-                        <div class="grammar-box glow-box">
-                            <h3>Fully Simplified CFG</h3>
-                            <div id="final-simplified" class="grammar-display scrollbar"></div>
-                        </div>
-                    </div>
 
-                    <div class="dynamic-graph-viewer">
-                        <h3>Interactive Transformation Replay</h3>
-                        <div class="graph-legend">
-                            <div class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span>Start Symbol</div>
-                            <div class="legend-item"><span class="legend-dot" style="background:#fbbf24;"></span>Nullable</div>
-                            <div class="legend-item"><span class="legend-dot" style="background:#34d399;"></span>Generating</div>
-                            <div class="legend-item"><span class="legend-dot" style="background:#f87171;"></span>Removed</div>
-                            <div class="legend-item"><span class="legend-dot" style="background:#94a3b8;"></span>Unreachable</div>
-                            <div class="legend-item"><span class="legend-line" style="background:#3b82f6;"></span>Unit Rule</div>
-                            <div class="legend-item"><span class="legend-line" style="background:#34d399; height:3px;"></span>Added</div>
+                        <div class="playback-body" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; align-items: stretch;">
+                            <div class="grammar-box glow-box" style="margin: 0; display: flex; flex-direction: column;">
+                                <h3 style="padding-bottom: 15px; border-bottom: 1px solid #333; margin-bottom: 15px; text-align: center;">Grammar Source</h3>
+                                <div id="dynamic-grammar" class="grammar-display scrollbar" style="flex: 1; transition: all 0.3s ease;"></div>
+                            </div>
+
+                            <div class="graph-wrapper" style="margin: 0; background: rgba(0,0,0,0.3); border: 1px inset #222; border-radius: 8px; position: relative;">
+                                <div class="graph-legend" style="top: 10px; right: 10px; background: rgba(0,0,0,0.7); box-shadow: none;">
+                                    <div class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span>Start</div>
+                                    <div class="legend-item"><span class="legend-dot" style="background:#fbbf24;"></span>Nullable</div>
+                                    <div class="legend-item"><span class="legend-dot" style="background:#34d399;"></span>Gen</div>
+                                    <div class="legend-item"><span class="legend-dot" style="background:#f87171;"></span>Rem</div>
+                                </div>
+                                <div id="dynamic-network" class="network-canvas" style="height: 400px; border: none; border-radius: 8px;"></div>
+                                <button class="btn-reset-graph" data-network="dynamic-network" style="bottom: 10px; left: 10px;">Reset View</button>
+                            </div>
                         </div>
-                        <div class="playback-controls">
-                            <button id="btn-prev-graph" class="btn btn-secondary">◀ Prev Stage</button>
-                            <span id="graph-stage-label">Stage 0: Original Grammar</span>
-                            <button id="btn-next-graph" class="btn btn-secondary">Next Stage ▶</button>
-                        </div>
-                        <div id="dynamic-network" class="network-canvas" style="height: 450px;"></div>
-                        <button class="btn-reset-graph" data-network="dynamic-network">Reset View</button>
                     </div>
 
                     <div class="panel-actions center-actions" style="flex-direction: column; align-items: center; gap: 1rem;">

@@ -51,15 +51,14 @@ const DOM = {
             sets: 'final-sets-summary'
         }
     ],
-
-    finalOrig: document.getElementById('final-original'),
-    finalSimp: document.getElementById('final-simplified'),
-
     // Dynamic Replay
     btnPrevGraph: document.getElementById('btn-prev-graph'),
     btnNextGraph: document.getElementById('btn-next-graph'),
     graphStageLabel: document.getElementById('graph-stage-label'),
     dynamicNetwork: document.getElementById('dynamic-network'),
+    dynamicGrammar: document.getElementById('dynamic-grammar'),
+    dynamicStats: document.getElementById('dynamic-stats'),
+    btnAutoPlay: document.getElementById('btn-auto-play'),
 
     // Navigator & Progress
     navigator: document.getElementById('stage-navigator'),
@@ -136,10 +135,41 @@ function renderGrammarStandardFormat(grammar) {
 }
 
 function renderGrammarDiff(beforeGrammar, afterGrammar, context) {
+    let ht = '';
+    
+    if (context === 'animated') {
+        const keys = [...new Set([...Object.keys(beforeGrammar), ...Object.keys(afterGrammar)])].sort();
+        if (keys.length === 0) return '<p style="padding:10px;text-align:center;color:gray;">Empty grammar</p>';
+        for (const lhs of keys) {
+            const beforeRhs = new Set((beforeGrammar[lhs] || []).map(r => r === '' ? '?' : r));
+            const afterRhs = new Set((afterGrammar[lhs] || []).map(r => r === '' ? '?' : r));
+            
+            const unionRhs = [...new Set([...beforeRhs, ...afterRhs])];
+            if (unionRhs.length === 0) continue;
+            
+            let tokens = [];
+            unionRhs.forEach(r => {
+                if (beforeRhs.has(r) && !afterRhs.has(r)) {
+                    tokens.push(`<span class="token-anim-removed">${r}</span>`);
+                } else if (!beforeRhs.has(r) && afterRhs.has(r)) {
+                    tokens.push(`<span class="token-anim-added">+ ${r}</span>`);
+                } else {
+                    tokens.push(`<span class="token-kept">${r}</span>`);
+                }
+            });
+            
+            ht += `<div class="grammar-rule">
+                <span class="rule-lhs">${lhs}</span>
+                <span class="rule-arrow">→</span>
+                <span class="rule-rhs">${tokens.join(' <span class="pipe">|</span> ')}</span>
+            </div>`;
+        }
+        return ht;
+    }
+
     const renderSource = context === 'before' ? beforeGrammar : afterGrammar;
     const compareSource = context === 'before' ? afterGrammar : beforeGrammar;
     const keys = Object.keys(renderSource).sort();
-    let ht = '';
     if (keys.length === 0) return '<p style="padding:10px;text-align:center;color:gray;">Empty grammar</p>';
     for (const lhs of keys) {
         const sourceRhs = (renderSource[lhs] || []).map(r => r === '' ? '?' : r);
@@ -447,9 +477,6 @@ function processAllStepsAndRender() {
         renderStats(prev.metrics, stage.metrics, dm.stats);
         renderSets(stage.stage_sets || stage.sets, i, dm.sets);
     }
-    DOM.finalOrig.innerHTML = renderGrammarStandardFormat(pipelineHistory[0].grammar);
-    DOM.finalSimp.innerHTML = renderGrammarStandardFormat(pipelineHistory[4].grammar);
-    renderStats(pipelineHistory[0].metrics, pipelineHistory[4].metrics, 'final-stats');
 
     setTimeout(() => {
         for (let i = 1; i <= 4; i++) {
@@ -515,18 +542,58 @@ DOM.btnAddRule.addEventListener('click', () => {
 });
 
 // Playback
+let autoPlayInterval = null;
 function updateDynamicPlayback() {
     if (!pipelineHistory.length) return;
     const cur = pipelineHistory[currentPlaybackStage], prev = currentPlaybackStage === 0 ? cur : pipelineHistory[currentPlaybackStage - 1];
     DOM.graphStageLabel.innerText = STAGE_LABELS[currentPlaybackStage];
+    
+    // Graph update
     const sets = cur.stage_sets || cur.sets || {};
     renderGrammarDiffGraph(prev.grammar, cur.grammar, DOM.dynamicNetwork, sets, currentPlaybackStage);
+    
+    // Stats update (Always compared to Stage 0 initial state for full scope)
+    renderStats(pipelineHistory[0].metrics, cur.metrics, 'dynamic-stats');
+    
+    // Grammar diff text update
+    if (currentPlaybackStage === 0) {
+        DOM.dynamicGrammar.innerHTML = renderGrammarStandardFormat(cur.grammar);
+    } else {
+        DOM.dynamicGrammar.innerHTML = renderGrammarDiff(prev.grammar, cur.grammar, 'animated');
+    }
+
     DOM.btnPrevGraph.disabled = currentPlaybackStage === 0;
     DOM.btnNextGraph.disabled = currentPlaybackStage === STAGE_LABELS.length - 1;
 }
 
 DOM.btnPrevGraph.addEventListener('click', () => { if (currentPlaybackStage > 0) { currentPlaybackStage--; updateDynamicPlayback(); } });
 DOM.btnNextGraph.addEventListener('click', () => { if (currentPlaybackStage < STAGE_LABELS.length - 1) { currentPlaybackStage++; updateDynamicPlayback(); } });
+
+DOM.btnAutoPlay.addEventListener('click', () => {
+    if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = null;
+        DOM.btnAutoPlay.innerText = '▶ Auto-Play';
+        DOM.btnAutoPlay.style.background = '#6366f1';
+    } else {
+        if (currentPlaybackStage === STAGE_LABELS.length - 1) currentPlaybackStage = 0;
+        updateDynamicPlayback();
+        DOM.btnAutoPlay.innerText = '⏸ Pause';
+        DOM.btnAutoPlay.style.background = '#ef4444';
+        
+        autoPlayInterval = setInterval(() => {
+            if (currentPlaybackStage < STAGE_LABELS.length - 1) {
+                currentPlaybackStage++;
+                updateDynamicPlayback();
+            } else {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+                DOM.btnAutoPlay.innerText = '▶ Auto-Play';
+                DOM.btnAutoPlay.style.background = '#6366f1';
+            }
+        }, 3000);
+    }
+});
 
 // --- PDF Generation Overhaul ---
 
