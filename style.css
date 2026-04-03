@@ -516,12 +516,24 @@ select.builder-input {
 }
 
 .btn-primary {
-    background: #fff;
-    color: #000;
+    background: #000;
+    color: var(--success);
+    border: 1px solid var(--success);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 8px rgba(16, 185, 129, 0.1);
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-primary:hover {
-    background: #e0e0e0;
+    background: var(--success);
+    color: #000;
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.4);
+    transform: translateY(-2px);
+    border-color: var(--success);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
 }
 
 .btn-secondary {
@@ -568,6 +580,35 @@ select.builder-input {
 
 .center-actions {
     justify-content: center;
+}
+
+/* Action Cards for Main Control */
+.action-card {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.action-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-5px);
+}
+
+.action-description {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    text-align: center;
+    max-width: 250px;
+    line-height: 1.4;
 }
 
 /* Pipeline Results Visibility */
@@ -2012,12 +2053,28 @@ html {
 
 .sbs-step-reasoning {
     display: none;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    line-height: 1.5;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px dashed #333;
+    font-size: 1.05rem;
+    color: #e2e8f0;
+    line-height: 1.6;
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-left: 3px solid var(--step-color, #666);
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px 8px 8px 4px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.sbs-step-reasoning::before {
+    content: 'Transformation Logic';
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--step-color, #888);
+    margin-bottom: 10px;
+    font-weight: 700;
+    opacity: 0.8;
 }
 
 .sbs-step.current .sbs-step-reasoning {
