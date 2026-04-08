@@ -67,6 +67,7 @@ const DOM = {
     progressBar: document.getElementById('scroll-progress'),
 
     btnExportReport: document.getElementById('btn-export-report'),
+    btnThemeToggle: document.getElementById('theme-toggle'),
 };
 
 const STAGE_LABELS = [
@@ -92,6 +93,9 @@ const hexToRgb = (hex) => {
     const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
     return `${r}, ${g}, ${b}`;
 };
+const isLightMode = () => document.documentElement.getAttribute('data-theme') === 'light';
+const getNodeFontColor = () => isLightMode() ? '#1e293b' : '#fff';
+const getNodeFontStroke = () => isLightMode() ? '#fff' : '#000';
 
 let pipelineHistory = [];
 let networkInstances = {};
@@ -547,7 +551,7 @@ function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container, sets = {
             color: { background: color, border: borderColor, highlight: { background: color, border: '#fff' } },
             shape: isTerm ? 'box' : 'circle',
             opacity: opacity,
-            font: { color: '#fff', size: 14, strokeWidth: 1, strokeColor: '#000' }
+            font: { color: getNodeFontColor(), size: 14, strokeWidth: 1, strokeColor: getNodeFontStroke() }
         });
     });
 
@@ -1089,12 +1093,12 @@ function updateSbsGraph(step) {
 
         const nodeData = {
             id, label: id,
-            color: { background: color, border, highlight: { background: color, border: '#fff' } },
+            color: { background: color, border, highlight: { background: color, border: isLightMode() ? '#1e293b' : '#fff' } },
             shape: (!nodeInfo.isVar || id === '\u03b5') ? 'box' : 'circle',
             opacity: 1,
             borderWidth: targetNodes.has(id) ? 3 : 1,
             shadow: targetNodes.has(id) ? { enabled: true, color: color, size: 15, x: 0, y: 0 } : false,
-            font: { color: '#fff', size: targetNodes.has(id) ? 20 : 16, strokeWidth: 1, strokeColor: '#000' }
+            font: { color: getNodeFontColor(), size: targetNodes.has(id) ? 20 : 16, strokeWidth: 1, strokeColor: getNodeFontStroke() }
         };
 
         if (currentNodeIds.has(id)) { sbsVisNodes.update(nodeData); }
@@ -1110,7 +1114,7 @@ function updateSbsGraph(step) {
                     id, label: id,
                     color: { background: 'rgba(239,68,68,0.3)', border: '#ef4444', highlight: { background: 'rgba(239,68,68,0.3)', border: '#ef4444' } },
                     opacity: 0.4,
-                    font: { color: '#f87171', size: 16, strokeWidth: 1, strokeColor: '#000' }
+                    font: { color: '#f87171', size: 16, strokeWidth: 1, strokeColor: getNodeFontStroke() }
                 };
                 if (currentNodeIds.has(id)) sbsVisNodes.update(nodeData);
                 else sbsVisNodes.add(nodeData);
@@ -1345,3 +1349,26 @@ document.addEventListener('click', (e) => {
         if (networkInstances[nid]) networkInstances[nid].fit({ animation: true });
     }
 });
+
+// =================== THEME TOGGLE ===================
+
+function initTheme() {
+    const saved = localStorage.getItem('cfg-theme');
+    if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+}
+
+function toggleTheme() {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    if (isLight) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('cfg-theme', 'dark');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('cfg-theme', 'light');
+    }
+}
+
+initTheme();
+DOM.btnThemeToggle.addEventListener('click', toggleTheme);
