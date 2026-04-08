@@ -159,6 +159,7 @@ header p {
     background: rgba(16, 185, 129, 0.1);
     padding: 2px 6px;
     border-radius: 4px;
+    text-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
 }
 
 .theory-subtitle {
@@ -387,6 +388,7 @@ h2 {
     margin-bottom: 0.5rem;
     font-weight: 600;
     color: #fff;
+    letter-spacing: -0.5px;
 }
 
 .subtitle {
@@ -970,9 +972,6 @@ select.builder-input {
 }
 
 /* Per-Step Reasoning Toggle (iteration trace steps) */
-.reasoning-step {
-    cursor: pointer;
-}
 
 .reasoning-step .reasoning-text {
     max-height: 0;
@@ -1078,6 +1077,7 @@ select.builder-input {
     border-radius: 6px;
     border-left: 2px solid transparent;
     transition: background 0.15s;
+    cursor: pointer;
 }
 
 .reasoning-step:hover {
@@ -1309,17 +1309,7 @@ select.builder-input {
     margin-bottom: 4px;
 }
 
-/* Concept Line */
-.concept-line {
-    padding: 10px 14px;
-    margin: 8px 0;
-    border-left: 3px solid #10b981;
-    background: rgba(16, 185, 129, 0.04);
-    color: #94a3b8;
-    font-size: 0.85rem;
-    line-height: 1.5;
-    border-radius: 0 6px 6px 0;
-}
+
 
 .rule-transform-container:last-child {
     border-bottom: none !important;
@@ -1632,9 +1622,6 @@ select.builder-input {
     }
 }
 
-.animate-panel {
-    opacity: 1;
-}
 
 
 .stage-sets-box {
@@ -1852,14 +1839,7 @@ select.builder-input {
     transition: none;
 }
 
-/* Typography & Neon */
-.highlight {
-    text-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
-}
 
-h2 {
-    letter-spacing: -0.5px;
-}
 
 /* Smooth Scroll */
 html {
@@ -2270,9 +2250,7 @@ html {
     color: #0f172a;
 }
 
-[data-theme="light"] .theory-header p {
-    color: #64748b;
-}
+
 
 [data-theme="light"] .theory-card {
     background: #fff;
@@ -2295,14 +2273,7 @@ html {
     color: #1e293b;
 }
 
-[data-theme="light"] .theory-card p,
-[data-theme="light"] .theory-card strong {
-    color: #64748b;
-}
 
-[data-theme="light"] .theory-card strong {
-    color: #334155;
-}
 
 [data-theme="light"] .highlight {
     color: var(--success);
@@ -2329,22 +2300,14 @@ html {
     background: rgba(5, 150, 105, 0.08);
 }
 
-[data-theme="light"] .definition-card p {
-    color: #64748b;
-}
+
 
 /* --- Apps Section --- */
 [data-theme="light"] .apps-section {
     border-top-color: #e2e8f0;
 }
 
-[data-theme="light"] .app-item h4 {
-    color: #1e293b;
-}
 
-[data-theme="light"] .app-item p {
-    color: #64748b;
-}
 
 /* --- Theory Divider --- */
 [data-theme="light"] .theory-divider {
@@ -2357,9 +2320,7 @@ html {
     border-color: rgba(5, 150, 105, 0.15);
 }
 
-[data-theme="light"] .pro-tip p {
-    color: #64748b;
-}
+
 
 /* --- Before/After Table --- */
 [data-theme="light"] .before-after-table {
@@ -2369,11 +2330,9 @@ html {
 
 [data-theme="light"] .before-after-table th {
     background: #f8fafc;
-    color: #64748b;
 }
 
 [data-theme="light"] .before-after-table td {
-    color: #334155;
     border-bottom-color: #f1f5f9;
 }
 
@@ -2391,14 +2350,12 @@ html {
 [data-theme="light"] .concept-badge {
     background: #fefce8;
     border-color: #fde68a;
-    color: #a16207;
 }
 
 /* --- Formal Math --- */
 [data-theme="light"] .formal-math {
     background: #f8fafc;
     border-left-color: #94a3b8;
-    color: #334155;
 }
 
 [data-theme="light"] .formal-math .math-operator {
@@ -2441,7 +2398,6 @@ html {
 }
 
 [data-theme="light"] .input-pane h3 {
-    color: #334155;
     border-bottom-color: #e2e8f0;
 }
 
@@ -2474,9 +2430,7 @@ html {
     color: #334155;
 }
 
-[data-theme="light"] .arrow-icon {
-    color: #94a3b8;
-}
+
 
 /* --- Buttons --- */
 [data-theme="light"] .btn-primary {
@@ -2522,9 +2476,7 @@ html {
     border-color: #cbd5e1;
 }
 
-[data-theme="light"] .action-description {
-    color: #64748b;
-}
+
 
 /* --- Pipeline Header --- */
 [data-theme="light"] .pipeline-header h2 {
@@ -2542,7 +2494,6 @@ html {
 [data-theme="light"] .logs-pane h3,
 [data-theme="light"] .visuals-pane h3,
 [data-theme="light"] .graph-wrapper h3 {
-    color: #475569;
     border-bottom-color: #e2e8f0;
 }
 
@@ -2554,7 +2505,6 @@ html {
 
 [data-theme="light"] .grammar-col h4 {
     border-bottom-color: #e2e8f0;
-    color: #64748b;
     background: #f8fafc;
 }
 
@@ -2599,9 +2549,7 @@ html {
     border-color: #cbd5e1;
 }
 
-[data-theme="light"] .stat-label {
-    color: #64748b;
-}
+
 
 [data-theme="light"] .stat-val {
     color: #0f172a;
@@ -2631,9 +2579,7 @@ html {
     border-left-color: #94a3b8;
 }
 
-[data-theme="light"] .log-entry h4 {
-    color: #1e293b;
-}
+
 
 [data-theme="light"] .log-entry .rule-list {
     background: #fff;
@@ -2644,9 +2590,7 @@ html {
     border-bottom-color: #f1f5f9;
 }
 
-[data-theme="light"] .rule-item.kept {
-    color: #64748b;
-}
+
 
 /* --- Reasoning Traces --- */
 [data-theme="light"] .reasoning-trace {
@@ -2655,7 +2599,6 @@ html {
 }
 
 [data-theme="light"] .reasoning-trace-title {
-    color: #94a3b8;
     border-bottom-color: #e2e8f0;
     background: #f1f5f9;
 }
@@ -2666,20 +2609,13 @@ html {
 
 [data-theme="light"] .iteration-result {
     background: #f1f5f9;
-    color: #64748b;
 }
 
 [data-theme="light"] .reasoning-step:hover {
     background: rgba(0, 0, 0, 0.02);
 }
 
-[data-theme="light"] .reasoning-rule {
-    color: #334155;
-}
 
-[data-theme="light"] .reasoning-text {
-    color: #64748b;
-}
 
 /* --- Rule Items with Reasoning --- */
 [data-theme="light"] .rule-item-reasoning {
@@ -2697,13 +2633,7 @@ html {
     color: #64748b;
 }
 
-[data-theme="light"] .rule-text {
-    color: #334155;
-}
 
-[data-theme="light"] .reasoning-inline {
-    color: #64748b;
-}
 
 /* --- Chevrons --- */
 [data-theme="light"] .reasoning-chevron::before {
@@ -2715,18 +2645,12 @@ html {
 }
 
 /* --- Chain --- */
-[data-theme="light"] .chain-label {
-    color: #94a3b8;
-}
-
 [data-theme="light"] .chain-arrow {
     color: #cbd5e1;
 }
 
 /* --- Nullable Positions --- */
-[data-theme="light"] .nullable-positions {
-    color: #64748b;
-}
+
 
 [data-theme="light"] .pos-badge {
     background: rgba(217, 119, 6, 0.08);
@@ -2744,7 +2668,6 @@ html {
 }
 
 [data-theme="light"] .reasoning-details-summary {
-    color: #64748b;
     background: #f8fafc;
 }
 
@@ -2760,7 +2683,6 @@ html {
 /* --- Concept Line --- */
 [data-theme="light"] .concept-line {
     background: rgba(5, 150, 105, 0.04);
-    color: #059669;
 }
 
 /* --- Graph Legend --- */
@@ -2770,9 +2692,7 @@ html {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
-[data-theme="light"] .legend-item {
-    color: #475569;
-}
+
 
 /* --- Grammar Rules (Diffs) --- */
 [data-theme="light"] .grammar-rule {
@@ -2780,25 +2700,7 @@ html {
     border-left-color: #e2e8f0;
 }
 
-[data-theme="light"] .token-kept {
-    color: #334155;
-}
 
-[data-theme="light"] .pipe {
-    color: #cbd5e1;
-}
-
-[data-theme="light"] .rule-lhs {
-    color: #0f172a;
-}
-
-[data-theme="light"] .rule-arrow {
-    color: #94a3b8;
-}
-
-[data-theme="light"] .rule-rhs {
-    color: #334155;
-}
 
 /* --- Grammar Box --- */
 [data-theme="light"] .grammar-box {
@@ -2812,7 +2714,6 @@ html {
 }
 
 [data-theme="light"] .grammar-box h3 {
-    color: #1e293b;
     border-bottom-color: #e2e8f0;
 }
 
@@ -2835,11 +2736,6 @@ html {
 /* --- Stage Sets Box --- */
 [data-theme="light"] .stage-sets-box {
     background: #f8fafc;
-    color: #334155;
-}
-
-[data-theme="light"] .set-label {
-    color: #64748b;
 }
 
 /* --- Algo Details --- */
@@ -2849,17 +2745,11 @@ html {
 }
 
 [data-theme="light"] .algo-details summary {
-    color: #64748b;
     background: #f1f5f9;
 }
 
 [data-theme="light"] .algo-details summary:hover {
     background: #e2e8f0;
-    color: #1e293b;
-}
-
-[data-theme="light"] .algo-details pre {
-    color: #64748b;
 }
 
 /* --- Stage Navigator --- */
@@ -2887,11 +2777,7 @@ html {
     color: #fff;
 }
 
-[data-theme="light"] .nav-item::after {
-    background: #fff;
-    color: #1e293b;
-    border-color: #e2e8f0;
-}
+
 
 /* --- Scroll Progress --- */
 [data-theme="light"] .scroll-progress-container {
@@ -2941,7 +2827,6 @@ html {
 }
 
 [data-theme="light"] .sbs-grammar-header {
-    color: #1e293b;
     border-bottom-color: #e2e8f0;
 }
 
@@ -2964,19 +2849,10 @@ html {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06), 0 0 20px rgba(var(--step-color-rgb, 0, 0, 0), 0.08);
 }
 
-[data-theme="light"] .sbs-step-rule {
-    color: #1e293b;
-}
-
 [data-theme="light"] .sbs-step-reasoning {
-    color: #334155;
     border-color: #e2e8f0;
     background: #f8fafc;
     box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.02);
-}
-
-[data-theme="light"] .sbs-step-stage {
-    color: #94a3b8;
 }
 
 /* --- Inline style overrides for dynamically styled elements --- */
@@ -2984,9 +2860,7 @@ html {
     border-bottom-color: #e2e8f0 !important;
 }
 
-[data-theme="light"] #graph-stage-label {
-    color: var(--success);
-}
+
 
 /* Smooth theme transition */
 body,

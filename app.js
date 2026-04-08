@@ -1360,8 +1360,7 @@ function initTheme() {
 }
 
 function toggleTheme() {
-    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-    if (isLight) {
+    if (isLightMode()) {
         document.documentElement.removeAttribute('data-theme');
         localStorage.setItem('cfg-theme', 'dark');
     } else {
